@@ -1,4 +1,8 @@
-﻿using System.Web.Mvc;
+﻿using System.Collections.Generic;
+using System.Web.Mvc;
+using AutoMapper;
+using Microsoft.Practices.ServiceLocation;
+using SolrNet;
 using SpiderRT.Web.Models;
 
 namespace SpiderRT.Web.Controllers
@@ -13,9 +17,14 @@ namespace SpiderRT.Web.Controllers
 		[HttpPost]
 		public ActionResult Search(SearchViewModel viewModel)
 		{
-			var results = new[] { new SearchResultViewModel{Filename = "foo"} };
+			var solrInstance = ServiceLocator.Current.GetInstance<ISolrOperations<CodeFile>>();
 
-			return View("SearchResults", results);
+			var solrResults = solrInstance.Query(new SolrQueryByField("content", viewModel.SearchText));
+
+			Mapper.CreateMap<CodeFile, SearchResultViewModel>();
+			var resultViewModels = Mapper.Map<IEnumerable<CodeFile>, IEnumerable<SearchResultViewModel>>(solrResults);
+
+			return View("SearchResults", resultViewModels);
 		}
 	}
 }

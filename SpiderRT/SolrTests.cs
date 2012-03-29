@@ -8,7 +8,6 @@ using NUnit.Framework;
 using Raven.Client;
 using Raven.Client.Document;
 using SolrNet;
-using SolrNet.Attributes;
 
 namespace SpiderRT
 {
@@ -16,21 +15,6 @@ namespace SpiderRT
 	{
 		private ISolrOperations<CodeFile> _solrInstance;
 		private IDocumentStore _documentStore;
-
-		public class CodeFile
-		{
-			[SolrUniqueKey("id")]
-			public Guid Id { get; set; }
-
-			[SolrField("filename")]
-			public string Filename { get; set; }
-
-			[SolrField("fullPath")]
-			public string FullPath { get; set; }
-
-			[SolrField("content")]
-			public string Content { get; set; }
-		}
 
 		[TestFixtureSetUp]
 		public void FixtureSetup()

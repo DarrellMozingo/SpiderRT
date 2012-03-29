@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
+using SolrNet;
 
 namespace SpiderRT.Web
 {
@@ -32,6 +29,8 @@ namespace SpiderRT.Web
 		protected void Application_Start()
 		{
 			AreaRegistration.RegisterAllAreas();
+
+			Startup.Init<CodeFile>("http://darrellmlnx:8983/solr");
 
 			RegisterGlobalFilters(GlobalFilters.Filters);
 			RegisterRoutes(RouteTable.Routes);
