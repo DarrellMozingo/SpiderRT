@@ -73,17 +73,19 @@ namespace SpiderRT
 		{
 			using(var session = _documentStore.OpenSession())
 			{
+				var savedFiles = session.Query<CodeFile>().ToList();
+
 				getFiles()
 					.ForEach(codeFile =>
-					         {
-					         	var exists = session.Query<CodeFile>().Any(x => x.FullPath == codeFile.FullPath);
+							 {
+								 var exists = savedFiles.Any(x => x.FullPath == codeFile.FullPath);
 
-					         	if(exists == false)
-					         	{
-					         		Console.WriteLine("Adding to DB: {0}", codeFile.FullPath);
-					         		session.Store(codeFile);
-					         	}
-					         });
+								 if (exists == false)
+								 {
+									 Console.WriteLine("Adding to DB: {0}", codeFile.FullPath);
+									 session.Store(codeFile);
+								 }
+							 });
 
 				session.SaveChanges();
 			}
@@ -91,7 +93,8 @@ namespace SpiderRT
 
 		private static IEnumerable<CodeFile> getFiles()
 		{
-			return Directory.GetFiles(@"C:\work\SpiderRT", "*.cs", SearchOption.AllDirectories)
+			return Directory.EnumerateFiles(@"C:\work\SpiderRT", "*.*", SearchOption.AllDirectories)
+				.Where(fileIsNotBlackListed)
 				.Select(filename => new FileInfo(filename))
 				.Select(fileInfo => new CodeFile
 				{
@@ -100,6 +103,19 @@ namespace SpiderRT
 					Content = File.ReadAllText(fileInfo.FullName),
 					Filename = fileInfo.Name
 				});
+		}
+
+		private static bool fileIsNotBlackListed(string filename)
+		{
+			filename = filename.ToLower();
+
+			var extensionBlackList = new[] { ".sln", ".gitignore", ".user", ".suo", ".csproj", ".chm" };
+			var pathBlackList = new[] { ".git", "packages", "bin", "obj", "_resharper" };
+
+			var blackListedByExtention = extensionBlackList.Any(filename.EndsWith);
+			var blackListedByPath = pathBlackList.Any(path => filename.Contains("\\" + path));
+
+			return (blackListedByExtention || blackListedByPath) == false;
 		}
 
 		private void saveToSolr()
