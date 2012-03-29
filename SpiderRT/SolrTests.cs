@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Text.RegularExpressions;
 using Microsoft.Practices.ServiceLocation;
 using NUnit.Framework;
 using Raven.Client;
@@ -110,12 +111,19 @@ namespace SpiderRT
 			filename = filename.ToLower();
 
 			var extensionBlackList = new[] { ".sln", ".gitignore", ".user", ".suo", ".csproj", ".chm" };
-			var pathBlackList = new[] { ".git", "packages", "bin", "obj", "_resharper" };
+			var pathBlackList = new[] { ".git", "packages", "bin", "obj", "_resharper.*" };
 
 			var blackListedByExtention = extensionBlackList.Any(filename.EndsWith);
-			var blackListedByPath = pathBlackList.Any(path => filename.Contains("\\" + path));
+			var blackListedByPath = pathBlackList.Any(blackListPath => Regex.IsMatch(filename, string.Format(@"\\{0}\\", blackListPath)));
 
-			return (blackListedByExtention || blackListedByPath) == false;
+			var fileIsBlackListed = (blackListedByExtention || blackListedByPath);
+
+			if (fileIsBlackListed)
+			{
+				Console.WriteLine("BLACKLISTED: {0}", filename);
+			}
+
+			return fileIsBlackListed == false;
 		}
 
 		private void saveToSolr()
