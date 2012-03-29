@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using Microsoft.Practices.ServiceLocation;
@@ -64,17 +65,15 @@ namespace SpiderRT
 		[Test, Explicit]
 		public void Import()
 		{
+			saveToDb();
+			saveToSolr();
+		}
+
+		private void saveToDb()
+		{
 			using(var session = _documentStore.OpenSession())
 			{
-				Directory.GetFiles(@"C:\work\SpiderRT", "*.cs", SearchOption.AllDirectories)
-					.Select(filename => new FileInfo(filename))
-					.Select(fileInfo => new CodeFile
-					{
-						Id = Guid.NewGuid(),
-						FullPath = fileInfo.FullName,
-						Content = File.ReadAllText(fileInfo.FullName),
-						Filename = fileInfo.Name
-					})
+				getFiles()
 					.ForEach(codeFile =>
 					         {
 					         	var exists = session.Query<CodeFile>().Any(x => x.FullPath == codeFile.FullPath);
@@ -88,7 +87,23 @@ namespace SpiderRT
 
 				session.SaveChanges();
 			}
+		}
 
+		private static IEnumerable<CodeFile> getFiles()
+		{
+			return Directory.GetFiles(@"C:\work\SpiderRT", "*.cs", SearchOption.AllDirectories)
+				.Select(filename => new FileInfo(filename))
+				.Select(fileInfo => new CodeFile
+				{
+					Id = Guid.NewGuid(),
+					FullPath = fileInfo.FullName,
+					Content = File.ReadAllText(fileInfo.FullName),
+					Filename = fileInfo.Name
+				});
+		}
+
+		private void saveToSolr()
+		{
 			using(var session = _documentStore.OpenSession())
 			{
 				session.Query<CodeFile>()
