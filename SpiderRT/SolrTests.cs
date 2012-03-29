@@ -35,12 +35,9 @@ namespace SpiderRT
 		public void Query()
 		{
 			var solr = ServiceLocator.Current.GetInstance<ISolrOperations<CodeFile>>();
-			var results = solr.Query(new SolrQueryByField("content", "namespace"));
 
-			foreach(var result in results)
-			{
-				Console.WriteLine("Match in: " + result.Filename);
-			}
+			solr.Query(new SolrQueryByField("content", "namespace"))
+				.ForEach(match => Console.WriteLine("Match in: ({0}) - {1}", match.Id, match.Filename));
 		}
 
 		[Test, Explicit]
