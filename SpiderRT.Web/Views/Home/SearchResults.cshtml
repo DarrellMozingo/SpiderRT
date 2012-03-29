@@ -15,6 +15,11 @@
 <ul>
 	@foreach (var result in Model)
 	{
-		<li>@result.Filename</li>
+		<li>
+			@result.Filename
+			<ul>
+				<li>@result.Content</li>
+			</ul>
+		</li>
 	}
 </ul>
