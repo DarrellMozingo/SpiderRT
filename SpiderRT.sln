@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpiderRT", "SpiderRT\SpiderRT.csproj", "{00739B92-DD78-4233-BBAD-CBA48C6DA677}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpiderRT.Web", "SpiderRT.Web\SpiderRT.Web.csproj", "{AB9FD1E6-854B-4231-9FA0-DC22F1F14A39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{00739B92-DD78-4233-BBAD-CBA48C6DA677}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00739B92-DD78-4233-BBAD-CBA48C6DA677}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00739B92-DD78-4233-BBAD-CBA48C6DA677}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB9FD1E6-854B-4231-9FA0-DC22F1F14A39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB9FD1E6-854B-4231-9FA0-DC22F1F14A39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB9FD1E6-854B-4231-9FA0-DC22F1F14A39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB9FD1E6-854B-4231-9FA0-DC22F1F14A39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
