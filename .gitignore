@@ -2,5 +2,8 @@
 *.user
 *.suo
 *.dotCover
+desktop.ini
 obj
 bin
+/packages/Raven*/server/Data/*
+/packages/Raven*/server/Logs/*
