@@ -1,0 +1,20 @@
+﻿@model IEnumerable<SearchResultViewModel>
+
+@{
+	ViewBag.Title = "Search Results";
+}
+
+<p>
+	@(Html.ActionLink<HomeController>(x => x.Index(), "Search again"))
+</p>
+
+<p>
+	Files containing search:
+</p>
+
+<ul>
+	@foreach (var result in Model)
+	{
+		<li>@result.Filename</li>
+	}
+</ul>

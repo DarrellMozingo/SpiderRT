@@ -1,0 +1,15 @@
+﻿@model SearchViewModel
+
+@{
+	ViewBag.Title = "Home";
+}
+
+@using(Html.BeginForm<HomeController>(x => x.Search(null)))
+{
+	<fieldset>
+		<legend>Search</legend>
+		Text: @Html.TextBoxFor(x => x.SearchText)
+	</fieldset>
+
+	@Html.SubmitButton("Search");
+}
