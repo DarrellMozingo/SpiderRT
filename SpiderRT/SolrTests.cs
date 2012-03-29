@@ -107,6 +107,7 @@ namespace SpiderRT
 			using(var session = _documentStore.OpenSession())
 			{
 				session.Query<CodeFile>()
+					.Customize(x => x.WaitForNonStaleResults(TimeSpan.FromSeconds(30)))
 					.ForEach(codeFile =>
 					         {
 					         	Console.WriteLine("Adding/updating in Solr: {0}", codeFile.FullPath);
