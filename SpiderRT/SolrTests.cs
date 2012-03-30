@@ -13,8 +13,14 @@ namespace SpiderRT
 {
 	public class SolrTests
 	{
+		private const string WORKING_FOLDER = @"C:\spider-repos";
 		private ISolrOperations<CodeFile> _solrInstance;
 		private IDocumentStore _documentStore;
+
+		private readonly IEnumerable<VcsInfo> _vcsRoots = new[]
+		{
+			new VcsInfo { Name = "test", Url = @"C:\work\test" }
+		};
 
 		[TestFixtureSetUp]
 		public void FixtureSetup()
@@ -47,11 +53,17 @@ namespace SpiderRT
 			Console.WriteLine("{0}: ({1}) - {2}", source, codeFile.Id, codeFile.Filename);
 		}
 
-		[Test, Explicit]
+		[Test]
 		public void Import()
 		{
+			updateVcsRoots();
 			saveToDb();
 			saveToSolr();
+		}
+
+		private void updateVcsRoots()
+		{
+			_vcsRoots.ForEach(vcsRoot => vcsRoot.CreateOrUpdateIn(WORKING_FOLDER));
 		}
 
 		private void saveToDb()
@@ -62,15 +74,15 @@ namespace SpiderRT
 
 				getFiles()
 					.ForEach(codeFile =>
-							 {
-								 var exists = savedFiles.Any(x => x.FullPath == codeFile.FullPath);
+					         {
+					         	var exists = savedFiles.Any(x => x.FullPath == codeFile.FullPath);
 
-								 if (exists == false)
-								 {
-									 Console.WriteLine("Adding to DB: {0}", codeFile.FullPath);
-									 session.Store(codeFile);
-								 }
-							 });
+					         	if(exists == false)
+					         	{
+					         		Console.WriteLine("Adding to DB: {0}", codeFile.FullPath);
+					         		session.Store(codeFile);
+					         	}
+					         });
 
 				session.SaveChanges();
 			}
@@ -78,9 +90,10 @@ namespace SpiderRT
 
 		private static IEnumerable<CodeFile> getFiles()
 		{
-			return Directory.EnumerateFiles(@"C:\work\SpiderRT", "*.*", SearchOption.AllDirectories)
-				.Where(fileIsNotBlackListed)
+			return Directory.EnumerateDirectories(WORKING_FOLDER)
+				.SelectMany(directory => Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories))
 				.Select(filename => new FileInfo(filename))
+				.Where(fileIsNotBlackListed)
 				.Select(fileInfo => new CodeFile
 				{
 					Id = Guid.NewGuid(),
@@ -90,21 +103,21 @@ namespace SpiderRT
 				});
 		}
 
-		private static bool fileIsNotBlackListed(string filename)
+		private static bool fileIsNotBlackListed(FileInfo fileInfo)
 		{
-			filename = filename.ToLower();
+			var filePath = fileInfo.FullName.ToLower();
 
 			var extensionBlackList = new[] { ".sln", ".gitignore", ".user", ".suo", ".csproj", ".chm" };
 			var pathBlackList = new[] { ".git", "packages", "bin", "obj", "_resharper.*" };
 
-			var blackListedByExtention = extensionBlackList.Any(filename.EndsWith);
-			var blackListedByPath = pathBlackList.Any(blackListPath => Regex.IsMatch(filename, string.Format(@"\\{0}\\", blackListPath)));
+			var blackListedByExtention = extensionBlackList.Any(filePath.EndsWith);
+			var blackListedByPath = pathBlackList.Any(blackListPath => Regex.IsMatch(filePath, string.Format(@"\\{0}\\", blackListPath)));
 
 			var fileIsBlackListed = (blackListedByExtention || blackListedByPath);
 
-			if (fileIsBlackListed)
+			if(fileIsBlackListed)
 			{
-				Console.WriteLine("BLACKLISTED: {0}", filename);
+				Console.WriteLine("BLACKLISTED: {0}", filePath);
 			}
 
 			return fileIsBlackListed == false;
