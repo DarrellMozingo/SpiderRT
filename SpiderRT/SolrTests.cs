@@ -32,28 +32,6 @@ namespace SpiderRT
 		}
 
 		[Test]
-		public void QuerySolr()
-		{
-			_solrInstance.Query(new SolrQueryByField("content", "namespace"))
-				.ForEach(codeFile => displayCodeFile(codeFile, "Solr"));
-		}
-
-		[Test]
-		public void QueryDb()
-		{
-			using(var session = _documentStore.OpenSession())
-			{
-				session.Query<CodeFile>()
-					.ForEach(codeFile => displayCodeFile(codeFile, "Database"));
-			}
-		}
-
-		private static void displayCodeFile(CodeFile codeFile, string source)
-		{
-			Console.WriteLine("{0}: ({1}) - {2}", source, codeFile.Id, codeFile.Filename);
-		}
-
-		[Test]
 		public void Import()
 		{
 			updateVcsRoots();
