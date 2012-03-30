@@ -92,7 +92,7 @@ namespace SpiderRT
 		{
 			var filePath = fileInfo.FullName.ToLower();
 
-			var extensionBlackList = new[] { ".sln", ".gitignore", ".user", ".suo", ".csproj", ".chm" };
+			var extensionBlackList = new[] { ".sln", ".gitignore", ".user", ".suo", ".csproj", ".chm", ".dll", ".exe" };
 			var pathBlackList = new[] { ".git", "packages", "bin", "obj", "_resharper.*" };
 
 			var blackListedByExtention = extensionBlackList.Any(filePath.EndsWith);
