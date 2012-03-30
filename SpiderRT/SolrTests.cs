@@ -75,12 +75,17 @@ namespace SpiderRT
 				getFiles()
 					.ForEach(codeFile =>
 					         {
-					         	var exists = savedFiles.Any(x => x.FullPath == codeFile.FullPath);
+					         	var existingFile = savedFiles.SingleOrDefault(x => x.FullPath == codeFile.FullPath);
 
-					         	if(exists == false)
+					         	if(existingFile == null)
 					         	{
 					         		Console.WriteLine("Adding to DB: {0}", codeFile.FullPath);
 					         		session.Store(codeFile);
+					         	}
+					         	else
+					         	{
+					         		Console.WriteLine("Updating in DB: {0}", codeFile.FullPath);
+					         		existingFile.Content = codeFile.Content;
 					         	}
 					         });
 
@@ -115,14 +120,7 @@ namespace SpiderRT
 			var blackListedByExtention = extensionBlackList.Any(filePath.EndsWith);
 			var blackListedByPath = pathBlackList.Any(blackListPath => Regex.IsMatch(filePath, string.Format(@"\\{0}\\", blackListPath)));
 
-			var fileIsBlackListed = (blackListedByExtention || blackListedByPath);
-
-			if(fileIsBlackListed)
-			{
-				Console.WriteLine("BLACKLISTED: {0}", filePath);
-			}
-
-			return fileIsBlackListed == false;
+			return (blackListedByExtention || blackListedByPath) == false;
 		}
 
 		private void saveToSolr()
