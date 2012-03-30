@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SearchResultViewModel>
+﻿@model IEnumerable<IGrouping<string, SearchResultViewModel>>
 
 @{
 	ViewBag.Title = "Search Results";
@@ -9,12 +9,20 @@
 </p>
 
 <p>
-	Files containing search term:
+	Files containing search text '@ViewBag.SearchText':
 </p>
 
 <ul>
-	@foreach (var result in Model)
+	@foreach (var resultGroup in Model)
 	{
-		<li>@result.Filename</li>
+		<li>
+			<b>@resultGroup.Key</b> repository
+			<ul>
+				@foreach (var file in resultGroup)
+				{
+					<li>@file.Filename</li>
+				}
+			</ul>
+		</li>
 	}
 </ul>

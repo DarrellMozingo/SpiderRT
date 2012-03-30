@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using AutoMapper;
 using Microsoft.Practices.ServiceLocation;
@@ -22,8 +23,10 @@ namespace SpiderRT.Web.Controllers
 			var solrResults = solrInstance.Query(new SolrQueryByField("content", viewModel.SearchText));
 
 			Mapper.CreateMap<CodeFile, SearchResultViewModel>();
-			var resultViewModels = Mapper.Map<IEnumerable<CodeFile>, IEnumerable<SearchResultViewModel>>(solrResults);
+			var resultViewModels = Mapper.Map<IEnumerable<CodeFile>, IEnumerable<SearchResultViewModel>>(solrResults)
+				.GroupBy(x => x.VcsName);
 
+			ViewBag.SearchText = viewModel.SearchText;
 			return View("SearchResults", resultViewModels);
 		}
 	}
