@@ -6,20 +6,18 @@ namespace SpiderRT
 {
 	public class VcsInfo
 	{
-		private string _workingFolder;
+		private const string WORKING_FOLDER = @"C:\spider-repos";
 
 		public string Url { get; set; }
 		public string Name { get; set; }
 
-		private string LocalPath
+		public string LocalPath
 		{
-			get { return Path.Combine(_workingFolder, Name); }
+			get { return Path.Combine(WORKING_FOLDER, Name); }
 		}
 
-		public void CreateOrUpdateIn(string workingFolder)
+		public void CreateOrUpdateIn()
 		{
-			_workingFolder = workingFolder;
-
 			if(exists())
 			{
 				update();
@@ -46,7 +44,7 @@ namespace SpiderRT
 		{
 			var gitCloneCommand = string.Format("clone {0} {1}", Url, Name);
 
-			execute(gitCloneCommand, _workingFolder);
+			execute(gitCloneCommand, WORKING_FOLDER);
 		}
 
 		private static void execute(string gitCommand, string path)

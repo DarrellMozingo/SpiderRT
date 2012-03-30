@@ -13,13 +13,13 @@ namespace SpiderRT
 {
 	public class SolrTests
 	{
-		private const string WORKING_FOLDER = @"C:\spider-repos";
 		private ISolrOperations<CodeFile> _solrInstance;
 		private IDocumentStore _documentStore;
 
 		private readonly IEnumerable<VcsInfo> _vcsRoots = new[]
 		{
-			new VcsInfo { Name = "test", Url = @"C:\work\test" }
+			new VcsInfo { Name = "test", Url = @"C:\work\test" },
+			new VcsInfo { Name = "SpiderRT", Url = @"C:\work\SpiderRT" }
 		};
 
 		[TestFixtureSetUp]
@@ -63,7 +63,7 @@ namespace SpiderRT
 
 		private void updateVcsRoots()
 		{
-			_vcsRoots.ForEach(vcsRoot => vcsRoot.CreateOrUpdateIn(WORKING_FOLDER));
+			_vcsRoots.ForEach(vcsRoot => vcsRoot.CreateOrUpdateIn());
 		}
 
 		private void saveToDb()
@@ -88,19 +88,21 @@ namespace SpiderRT
 			}
 		}
 
-		private static IEnumerable<CodeFile> getFiles()
+		private IEnumerable<CodeFile> getFiles()
 		{
-			return Directory.EnumerateDirectories(WORKING_FOLDER)
-				.SelectMany(directory => Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories))
-				.Select(filename => new FileInfo(filename))
-				.Where(fileIsNotBlackListed)
-				.Select(fileInfo => new CodeFile
-				{
-					Id = Guid.NewGuid(),
-					FullPath = fileInfo.FullName,
-					Content = File.ReadAllText(fileInfo.FullName),
-					Filename = fileInfo.Name
-				});
+			return _vcsRoots
+				.SelectMany(vcsRoot => Directory.EnumerateFiles(vcsRoot.LocalPath, "*.*", SearchOption.AllDirectories)
+				                       	.Select(filePath => new FileInfo(filePath))
+				                       	.Where(fileIsNotBlackListed)
+				                       	.Select(indexedFile => new CodeFile
+				                       	{
+				                       		Id = Guid.NewGuid(),
+				                       		FullPath = indexedFile.FullName,
+				                       		Content = File.ReadAllText(indexedFile.FullName),
+				                       		Filename = indexedFile.Name,
+				                       		VcsName = vcsRoot.Name,
+				                       		VcsUrl = vcsRoot.Url
+				                       	}));
 		}
 
 		private static bool fileIsNotBlackListed(FileInfo fileInfo)
@@ -127,16 +129,14 @@ namespace SpiderRT
 		{
 			using(var session = _documentStore.OpenSession())
 			{
-				session.Query<CodeFile>()
-					.Customize(x => x.WaitForNonStaleResults(TimeSpan.FromSeconds(30)))
-					.ForEach(codeFile =>
-					         {
-					         	Console.WriteLine("Adding/updating in Solr: {0}", codeFile.FullPath);
-					         	_solrInstance.Add(codeFile);
-					         });
+				var documentsToAdd = session.Query<CodeFile>().Customize(x => x.WaitForNonStaleResults(TimeSpan.FromSeconds(30))).ToList();
 
-				_solrInstance.Commit();
+				documentsToAdd.ForEach(codeFile => Console.WriteLine("Adding/updating in Solr: {0}", codeFile.FullPath));
+				_solrInstance.Add(documentsToAdd);
 			}
+
+			_solrInstance.Commit();
+			_solrInstance.Optimize();
 		}
 	}
 }

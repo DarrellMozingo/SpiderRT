@@ -16,5 +16,11 @@ namespace SpiderRT
 
 		[SolrField("content")]
 		public string Content { get; set; }
+
+		[SolrField("vcsName")]
+		public string VcsName { get; set; }
+
+		[SolrField("vcsUrl")]
+		public string VcsUrl { get; set; }
 	}
 }
