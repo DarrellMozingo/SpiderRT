@@ -9,17 +9,12 @@
 </p>
 
 <p>
-	Files containing search:
+	Files containing search term:
 </p>
 
 <ul>
 	@foreach (var result in Model)
 	{
-		<li>
-			@result.Filename
-			<ul>
-				<li>@result.Content</li>
-			</ul>
-		</li>
+		<li>@result.Filename</li>
 	}
 </ul>
