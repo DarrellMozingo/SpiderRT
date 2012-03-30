@@ -1,8 +1,9 @@
+### Description
 SpiderRT lets you search for specific terms across multiple code base repositories, reguardless of their language.
 
 Useful for knowing what projects may be using a certain database table, method in a shared library, etc.
 
-Future plans include:
+### Future plans include:
 * Handle file deletions from Solr when they're deleted from the code repository
 * Supporting multiple VCS providers (SVN, Hg, etc)
 * Show relevant line from file match and highlight the search term in the web UI
