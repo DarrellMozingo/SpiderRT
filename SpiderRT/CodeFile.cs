@@ -1,13 +1,9 @@
-using System;
 using SolrNet.Attributes;
 
 namespace SpiderRT
 {
-	public class CodeFile
+	public class CodeFile : Entity
 	{
-		[SolrUniqueKey("id")]
-		public Guid Id { get; set; }
-
 		[SolrField("filename")]
 		public string Filename { get; set; }
 

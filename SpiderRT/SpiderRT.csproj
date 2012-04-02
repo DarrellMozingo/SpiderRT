@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeFile.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SolrTests.cs" />
     <Compile Include="HelperExtensions.cs" />
