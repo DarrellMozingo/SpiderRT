@@ -6,6 +6,7 @@ namespace SpiderRT
 {
 	public class VcsInfo
 	{
+		private Settings _settings;
 		private const string WORKING_FOLDER = @"C:\spider-repos";
 
 		public string Url { get; set; }
@@ -16,8 +17,10 @@ namespace SpiderRT
 			get { return Path.Combine(WORKING_FOLDER, Name); }
 		}
 
-		public void CreateOrUpdateIn()
+		public void CreateOrUpdate(Settings settings)
 		{
+			_settings = settings;
+
 			if(exists())
 			{
 				update();
@@ -47,7 +50,7 @@ namespace SpiderRT
 			execute(gitCloneCommand, WORKING_FOLDER);
 		}
 
-		private static void execute(string gitCommand, string path)
+		private void execute(string gitCommand, string path)
 		{
 			var gitInfo = new ProcessStartInfo
 			{
@@ -55,7 +58,7 @@ namespace SpiderRT
 				RedirectStandardError = true,
 				RedirectStandardOutput = true,
 				UseShellExecute = false,
-				FileName = @"C:\Program Files (x86)\Git\bin\git.exe",
+				FileName = Path.Combine(_settings.GitPath, "git.exe"),
 				Arguments = gitCommand,
 				WorkingDirectory = path
 			};

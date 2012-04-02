@@ -15,20 +15,36 @@ namespace SpiderRT
 	{
 		private ISolrOperations<CodeFile> _solrInstance;
 		private IDocumentStore _documentStore;
+		private Settings _settings;
 
 		private readonly IEnumerable<VcsInfo> _vcsRoots = new[]
 		{
 			new VcsInfo { Name = "test", Url = @"C:\work\test" },
-			new VcsInfo { Name = "SpiderRT", Url = @"C:\work\SpiderRT" }
+			//new VcsInfo { Name = "SpiderRT", Url = @"C:\work\SpiderRT" }
 		};
 
 		[TestFixtureSetUp]
 		public void FixtureSetup()
 		{
-			Startup.Init<CodeFile>("http://darrellmlnx:8983/solr");
-			_solrInstance = ServiceLocator.Current.GetInstance<ISolrOperations<CodeFile>>();
-
 			_documentStore = new DocumentStore { Url = "http://localhost:8080" }.Initialize();
+
+			loadSettings();
+
+			Startup.Init<CodeFile>(_settings.SolrUrl);
+			_solrInstance = ServiceLocator.Current.GetInstance<ISolrOperations<CodeFile>>();
+		}
+
+		private void loadSettings()
+		{
+			using (var session = _documentStore.OpenSession())
+			{
+				_settings = session.Query<Settings>().FirstOrDefault();
+			}
+
+			if (_settings == null)
+			{
+				throw new Exception("No settings document found. Fire up the web site and fill in the settings details first.");
+			}
 		}
 
 		[Test]
@@ -41,7 +57,7 @@ namespace SpiderRT
 
 		private void updateVcsRoots()
 		{
-			_vcsRoots.ForEach(vcsRoot => vcsRoot.CreateOrUpdateIn());
+			_vcsRoots.ForEach(vcsRoot => vcsRoot.CreateOrUpdate(_settings));
 		}
 
 		private void saveToDb()
