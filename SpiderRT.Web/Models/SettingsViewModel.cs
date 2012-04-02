@@ -2,7 +2,7 @@
 {
 	public class SettingsViewModel
 	{
-		public string IndexServer { get; set; }
+		public string SolrUrl { get; set; }
 		public string GitPath { get; set; }
 	}
 }
