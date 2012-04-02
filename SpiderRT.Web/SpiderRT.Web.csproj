@@ -138,6 +138,7 @@
   <ItemGroup>
     <None Include="SolrNet.chm" />
     <Content Include="Views\Home\Settings.cshtml" />
+    <Content Include="Views\Shared\SearchPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpiderRT\SpiderRT.csproj">

@@ -4,12 +4,10 @@
 	ViewBag.Title = "Search Results";
 }
 
-<p>
-	@(Html.ActionLink<HomeController>(x => x.Index(), "Search again"))
-</p>
+@Html.Partial("SearchPartial", new SearchViewModel())
 
 <p>
-	Files containing search text '@ViewBag.SearchText':
+	Files containing '@ViewBag.SearchText':
 </p>
 
 <ul>

@@ -1,0 +1,10 @@
+﻿@model SearchViewModel
+
+@using(Html.BeginForm<HomeController>(x => x.Search(null)))
+{
+	<fieldset>
+		<legend>Search</legend>
+		
+		Containing Text: @Html.TextBoxFor(x => x.SearchText) @Html.SubmitButton("search", "Search")
+	</fieldset>
+}
