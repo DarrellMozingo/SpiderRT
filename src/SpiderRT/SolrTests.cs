@@ -18,6 +18,9 @@ namespace SpiderRT
 		private Settings _settings;
 		private IEnumerable<VcsInfo> _vcsRoots;
 
+		private static readonly string[] _extensionBlackList = new[] { ".sln", ".gitignore", ".user", ".suo", ".csproj", ".chm", ".dll", ".exe" };
+		private static readonly string[] _pathBlackList = new[] { ".git", "packages", "bin", "obj", "_resharper.*" };
+
 		[TestFixtureSetUp]
 		public void FixtureSetup()
 		{
@@ -108,11 +111,8 @@ namespace SpiderRT
 		{
 			var filePath = fileInfo.FullName.ToLower();
 
-			var extensionBlackList = new[] { ".sln", ".gitignore", ".user", ".suo", ".csproj", ".chm", ".dll", ".exe" };
-			var pathBlackList = new[] { ".git", "packages", "bin", "obj", "_resharper.*" };
-
-			var blackListedByExtention = extensionBlackList.Any(filePath.EndsWith);
-			var blackListedByPath = pathBlackList.Any(blackListPath => Regex.IsMatch(filePath, string.Format(@"\\{0}\\", blackListPath)));
+			var blackListedByExtention = _extensionBlackList.Any(filePath.EndsWith);
+			var blackListedByPath = _pathBlackList.Any(blackListPath => Regex.IsMatch(filePath, string.Format(@"\\{0}\\", blackListPath)));
 
 			return (blackListedByExtention || blackListedByPath) == false;
 		}
