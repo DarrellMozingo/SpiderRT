@@ -33,8 +33,8 @@ namespace SpiderRT.Web
 		{
 			AreaRegistration.RegisterAllAreas();
 
+			DocumentStore = new DocumentStore { ConnectionStringName = "Raven" }.Initialize();
 			Startup.Init<CodeFile>("http://darrellmlnx:8983/solr");
-			DocumentStore = new DocumentStore { Url = "http://localhost:8080" }.Initialize();
 
 			RegisterGlobalFilters(GlobalFilters.Filters);
 			RegisterRoutes(RouteTable.Routes);

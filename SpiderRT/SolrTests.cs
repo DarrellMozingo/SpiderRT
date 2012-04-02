@@ -26,7 +26,7 @@ namespace SpiderRT
 		[TestFixtureSetUp]
 		public void FixtureSetup()
 		{
-			_documentStore = new DocumentStore { Url = "http://localhost:8080" }.Initialize();
+			_documentStore = new DocumentStore { ConnectionStringName = "Raven" }.Initialize();
 
 			loadSettings();
 
