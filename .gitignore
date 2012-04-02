@@ -5,5 +5,5 @@
 desktop.ini
 obj
 bin
-/packages/Raven*/server/Data/*
-/packages/Raven*/server/Logs/*
+*/packages/Raven*/server/Data/*
+*/packages/Raven*/server/Logs/*
