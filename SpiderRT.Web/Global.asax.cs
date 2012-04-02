@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.Linq;
+using System.Web.Mvc;
 using System.Web.Routing;
 using Raven.Client;
 using Raven.Client.Document;
@@ -34,7 +35,16 @@ namespace SpiderRT.Web
 			AreaRegistration.RegisterAllAreas();
 
 			DocumentStore = new DocumentStore { ConnectionStringName = "Raven" }.Initialize();
-			Startup.Init<CodeFile>("http://darrellmlnx:8983/solr");
+
+			using(var session = DocumentStore.OpenSession())
+			{
+				var settings = session.Query<Settings>().FirstOrDefault();
+
+				if (settings != null)
+				{
+					Startup.Init<CodeFile>(settings.SolrUrl);
+				}
+			}
 
 			RegisterGlobalFilters(GlobalFilters.Filters);
 			RegisterRoutes(RouteTable.Routes);
