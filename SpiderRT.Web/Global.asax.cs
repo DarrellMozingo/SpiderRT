@@ -1,5 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
+using Raven.Client;
+using Raven.Client.Document;
 using SolrNet;
 
 namespace SpiderRT.Web
@@ -9,6 +11,8 @@ namespace SpiderRT.Web
 
 	public class MvcApplication : System.Web.HttpApplication
 	{
+		public static IDocumentStore DocumentStore { get; private set; }
+
 		public static void RegisterGlobalFilters(GlobalFilterCollection filters)
 		{
 			filters.Add(new HandleErrorAttribute());
@@ -23,7 +27,6 @@ namespace SpiderRT.Web
 				"{controller}/{action}/{id}", // URL with parameters
 				new { controller = "Home", action = "Index", id = UrlParameter.Optional } // Parameter defaults
 			);
-
 		}
 
 		protected void Application_Start()
@@ -31,6 +34,7 @@ namespace SpiderRT.Web
 			AreaRegistration.RegisterAllAreas();
 
 			Startup.Init<CodeFile>("http://darrellmlnx:8983/solr");
+			DocumentStore = new DocumentStore { Url = "http://localhost:8080" }.Initialize();
 
 			RegisterGlobalFilters(GlobalFilters.Filters);
 			RegisterRoutes(RouteTable.Routes);

@@ -1,0 +1,19 @@
+﻿@model SettingsViewModel
+
+@{
+	ViewBag.Title = "Settings";
+}
+
+@using(Html.BeginForm<HomeController>(x => x.Settings(null)))
+{
+	<fieldset>
+		<legend>Settings</legend>
+		Index server: @Html.TextBoxFor(x => x.IndexServer)
+		<br />
+		Git path: @Html.TextBoxFor(x => x.GitPath)
+	</fieldset>
+
+	@Html.SubmitButton("Save")
+	<span>&nbsp;&nbsp;&nbsp;</span>
+	@(Html.ActionLink<HomeController>(x => x.Index(), "Cancel"))
+}
