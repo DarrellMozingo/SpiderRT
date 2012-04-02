@@ -16,12 +16,7 @@ namespace SpiderRT
 		private ISolrOperations<CodeFile> _solrInstance;
 		private IDocumentStore _documentStore;
 		private Settings _settings;
-
-		private readonly IEnumerable<VcsInfo> _vcsRoots = new[]
-		{
-			new VcsInfo { Name = "test", Url = @"C:\work\test" },
-			//new VcsInfo { Name = "SpiderRT", Url = @"C:\work\SpiderRT" }
-		};
+		private IEnumerable<VcsInfo> _vcsRoots;
 
 		[TestFixtureSetUp]
 		public void FixtureSetup()
@@ -32,16 +27,21 @@ namespace SpiderRT
 
 			Startup.Init<CodeFile>(_settings.SolrUrl);
 			_solrInstance = ServiceLocator.Current.GetInstance<ISolrOperations<CodeFile>>();
+
+			_vcsRoots = new[]
+			{
+				new VcsInfo(_settings) { Name = "test", Url = @"C:\work\test" },
+			};
 		}
 
 		private void loadSettings()
 		{
-			using (var session = _documentStore.OpenSession())
+			using(var session = _documentStore.OpenSession())
 			{
 				_settings = session.Query<Settings>().FirstOrDefault();
 			}
 
-			if (_settings == null)
+			if(_settings == null)
 			{
 				throw new Exception("No settings document found. Fire up the web site and fill in the settings details first.");
 			}
@@ -57,7 +57,7 @@ namespace SpiderRT
 
 		private void updateVcsRoots()
 		{
-			_vcsRoots.ForEach(vcsRoot => vcsRoot.CreateOrUpdate(_settings));
+			_vcsRoots.ForEach(vcsRoot => vcsRoot.CreateOrUpdate());
 		}
 
 		private void saveToDb()

@@ -6,21 +6,23 @@ namespace SpiderRT
 {
 	public class VcsInfo
 	{
-		private Settings _settings;
-		private const string WORKING_FOLDER = @"C:\spider-repos";
+		private readonly Settings _settings;
 
 		public string Url { get; set; }
 		public string Name { get; set; }
 
 		public string LocalPath
 		{
-			get { return Path.Combine(WORKING_FOLDER, Name); }
+			get { return Path.Combine(_settings.WorkingFolder, Name); }
 		}
 
-		public void CreateOrUpdate(Settings settings)
+		public VcsInfo(Settings settings)
 		{
 			_settings = settings;
+		}
 
+		public void CreateOrUpdate()
+		{
 			if(exists())
 			{
 				update();
@@ -47,7 +49,7 @@ namespace SpiderRT
 		{
 			var gitCloneCommand = string.Format("clone {0} {1}", Url, Name);
 
-			execute(gitCloneCommand, WORKING_FOLDER);
+			execute(gitCloneCommand, _settings.WorkingFolder);
 		}
 
 		private void execute(string gitCommand, string path)
