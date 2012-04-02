@@ -18,6 +18,11 @@ namespace SpiderRT.Web.Controllers
 		[HttpPost]
 		public ActionResult Search(SearchViewModel viewModel)
 		{
+			if (string.IsNullOrEmpty(viewModel.SearchText))
+			{
+				return RedirectToAction("Index");
+			}
+
 			var solrInstance = ServiceLocator.Current.GetInstance<ISolrOperations<CodeFile>>();
 
 			var solrResults = solrInstance.Query(new SolrQueryByField("content", viewModel.SearchText));
