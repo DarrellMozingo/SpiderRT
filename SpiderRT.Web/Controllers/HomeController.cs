@@ -53,6 +53,7 @@ namespace SpiderRT.Web.Controllers
 			{
 				var settings = session.Query<Settings>().FirstOrDefault() ?? new Settings();
 
+				settings.WorkingFolder = viewModel.WorkingFolder;
 				settings.GitPath = viewModel.GitPath;
 				settings.SolrUrl = viewModel.SolrUrl;
 
