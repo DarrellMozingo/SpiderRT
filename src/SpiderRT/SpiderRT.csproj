@@ -34,9 +34,6 @@
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\packages\RavenDB.1.0.701\lib\net40\AsyncCtpLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Practices.ServiceLocation">
-      <HintPath>..\packages\CommonServiceLocator.1.0\lib\NET35\Microsoft.Practices.ServiceLocation.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -58,14 +55,8 @@
     <Reference Include="Raven.Client.MvcIntegration">
       <HintPath>..\packages\RavenDB.1.0.701\lib\net40\Raven.Client.MvcIntegration.dll</HintPath>
     </Reference>
-    <Reference Include="SolrNet">
-      <HintPath>..\packages\SolrNet.0.3.1\lib\SolrNet.dll</HintPath>
-    </Reference>
     <Reference Include="StructureMap">
       <HintPath>..\packages\structuremap.2.6.1.0\lib\StructureMap.dll</HintPath>
-    </Reference>
-    <Reference Include="StructureMap.SolrNetIntegration">
-      <HintPath>..\packages\SolrNet.StructureMap.0.3.1\lib\StructureMap.SolrNetIntegration.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -80,7 +71,7 @@
     <Compile Include="CodeFile.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="SolrTests.cs" />
+    <Compile Include="Tests.cs" />
     <Compile Include="HelperExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VcsInfo.cs" />

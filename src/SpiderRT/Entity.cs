@@ -1,11 +1,9 @@
 using System;
-using SolrNet.Attributes;
 
 namespace SpiderRT
 {
 	public class Entity : IEquatable<Entity>
 	{
-		[SolrUniqueKey("id")]
 		public Guid Id { get; set; }
 
 		public Entity()

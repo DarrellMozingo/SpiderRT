@@ -6,5 +6,9 @@
 		<legend>Search</legend>
 		
 		Containing Text: @Html.TextBoxFor(x => x.SearchText) @Html.SubmitButton("search", "Search")
+
+		<span style="font-size: 0.8em">
+			(see Lucene query syntax examples <a href="http://wiki.alfresco.com/wiki/Full_Text_Search_Query_Syntax">here</a> and <a href="http://www.lucenetutorial.com/lucene-query-syntax.html">here</a>)
+		</span>
 	</fieldset>
 }

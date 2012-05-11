@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.Mvc;
 using AutoMapper;
-using Microsoft.Practices.ServiceLocation;
-using SolrNet;
+using Raven.Abstractions.Indexing;
+using Raven.Client.Document;
+using Raven.Client.Indexes;
+using Raven.Client.Linq;
 using SpiderRT.Web.Models;
 
 namespace SpiderRT.Web.Controllers
@@ -18,17 +21,21 @@ namespace SpiderRT.Web.Controllers
 		[HttpPost]
 		public ActionResult Search(SearchViewModel viewModel)
 		{
+			IndexCreation.CreateIndexes(Assembly.GetExecutingAssembly(), MvcApplication.DocumentStore);
+
 			if (string.IsNullOrEmpty(viewModel.SearchText))
 			{
 				return RedirectToAction("Index");
 			}
 
-			var solrInstance = ServiceLocator.Current.GetInstance<ISolrOperations<CodeFile>>();
-
-			var solrResults = solrInstance.Query(new SolrQueryByField("content", viewModel.SearchText));
+			IEnumerable<CodeFile> searchResults;
+			using (var session = MvcApplication.DocumentStore.OpenSession())
+			{
+				searchResults = session.Query<CodeFile, CodeFile_ByContent>().Search(x => x.Content, viewModel.SearchText).ToList();
+			}
 
 			Mapper.CreateMap<CodeFile, SearchResultViewModel>();
-			var viewModels = Mapper.Map<IEnumerable<CodeFile>, IEnumerable<SearchResultViewModel>>(solrResults)
+			var viewModels = Mapper.Map<IEnumerable<CodeFile>, IEnumerable<SearchResultViewModel>>(searchResults)
 				.GroupBy(x => x.VcsName);
 
 			ViewBag.SearchText = viewModel.SearchText;
@@ -60,7 +67,6 @@ namespace SpiderRT.Web.Controllers
 
 				settings.WorkingFolder = viewModel.WorkingFolder;
 				settings.GitPath = viewModel.GitPath;
-				settings.SolrUrl = viewModel.SolrUrl;
 
 				session.Store(settings);
 
@@ -68,6 +74,19 @@ namespace SpiderRT.Web.Controllers
 			}
 
 			return RedirectToAction("Index");
+		}
+	}
+
+	public class CodeFile_ByContent : AbstractIndexCreationTask
+	{
+		public override IndexDefinition CreateIndexDefinition()
+		{
+			return new IndexDefinitionBuilder<CodeFile>
+			{
+				Map = codeFiles => from codeFile in codeFiles
+								   select new { codeFile.Content },
+				Indexes = { { x => x.Content, FieldIndexing.Analyzed } }
+			}.ToIndexDefinition(new DocumentStore().Conventions);
 		}
 	}
 }
