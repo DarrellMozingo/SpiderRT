@@ -18,17 +18,16 @@ namespace SpiderRT.SlowTests
 		{
 			_documentStore = new EmbeddableDocumentStore { RunInMemory = true }.Initialize();
 
-			_ingester = new Ingester(_documentStore);
-
 			_tempWorkingFolder = Path.GetFullPath(Guid.NewGuid().ToString());
 			Directory.CreateDirectory(_tempWorkingFolder);
 
 			using(var session = _documentStore.OpenSession())
 			{
 				session.Store(new Settings { WorkingFolder = _tempWorkingFolder });
-
 				session.SaveChanges();
 			}
+
+			_ingester = new Ingester(_documentStore);
 		}
 
 		[TearDown]
@@ -40,8 +39,13 @@ namespace SpiderRT.SlowTests
 		[Test]
 		public void Should_ingest_a_single_file_in_a_single_folder()
 		{
-			Directory.CreateDirectory(_tempWorkingFolder + "\\repo1");
-			File.WriteAllText(_tempWorkingFolder + "\\repo1\\test.txt", "test-contents");
+			const string repositoryName = "repo1";
+			const string codeFileName = "test.txt";
+			const string codeFileContents = "test-contents";
+			var codeFilePath = Path.Combine(_tempWorkingFolder, repositoryName, codeFileName);
+
+			createRepositoryFolder(repositoryName);
+			File.WriteAllText(codeFilePath, codeFileContents);
 
 			_ingester.Ingest();
 
@@ -53,9 +57,14 @@ namespace SpiderRT.SlowTests
 			}
 
 			Assert.That(ingestedCodeFile, Is.Not.Null, "No file was ingested.");
-			Assert.That(ingestedCodeFile.Filename, Is.EqualTo("test.txt"));
-			Assert.That(ingestedCodeFile.FullPath, Is.EqualTo(_tempWorkingFolder + "\\repo1\\test.txt"));
-			Assert.That(ingestedCodeFile.Content, Is.EqualTo("test-contents"));
+			Assert.That(ingestedCodeFile.Filename, Is.EqualTo(codeFileName));
+			Assert.That(ingestedCodeFile.FullPath, Is.EqualTo(codeFilePath));
+			Assert.That(ingestedCodeFile.Content, Is.EqualTo(codeFileContents));
+		}
+
+		private void createRepositoryFolder(string repositoryName)
+		{
+			Directory.CreateDirectory(Path.Combine(_tempWorkingFolder, repositoryName));
 		}
 	}
 
