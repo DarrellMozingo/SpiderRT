@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -40,68 +39,55 @@ namespace SpiderRT.SlowTests
 		[Test]
 		public void Should_ingest_a_single_file_in_a_single_folder()
 		{
-			const string repositoryName = "repo1";
-			const string codeFileName = "test.txt";
-			const string codeFileContents = "test-contents";
-			var codeFilePath = Path.Combine(_tempWorkingFolder, repositoryName, codeFileName);
-
-			createRepositoryFolder(repositoryName);
-			File.WriteAllText(codeFilePath, codeFileContents);
+			var codeFilePath = createFileInRepository("repo", "test.txt", "test-contents");
 
 			_ingester.Ingest();
 
-			CodeFile ingestedCodeFile;
-
-			using(var session = _documentStore.OpenSession())
-			{
-				ingestedCodeFile = session.Query<CodeFile>().FirstOrDefault();
-			}
+			var ingestedCodeFile = savedCodeFiles().FirstOrDefault();
 
 			Assert.That(ingestedCodeFile, Is.Not.Null, "No file was ingested.");
-			Assert.That(ingestedCodeFile.Filename, Is.EqualTo(codeFileName));
-			Assert.That(ingestedCodeFile.FullPath, Is.EqualTo(codeFilePath));
-			Assert.That(ingestedCodeFile.Content, Is.EqualTo(codeFileContents));
+			asssertCodeFileIsCorrect(ingestedCodeFile, codeFilePath, "test-contents");
 		}
 
 		[Test]
 		public void Should_ingest_two_files_in_a_single_folder()
 		{
-			const string repositoryName = "repo1";
-			const string codeFileName1 = "test1.txt";
-			const string codeFileName2 = "test2.txt";
-			const string codeFileContents1 = "test-contents-1";
-			const string codeFileContents2 = "test-contents-2";
-
-			var codeFilePath1 = Path.Combine(_tempWorkingFolder, repositoryName, codeFileName1);
-			var codeFilePath2 = Path.Combine(_tempWorkingFolder, repositoryName, codeFileName2);
-
-			createRepositoryFolder(repositoryName);
-			File.WriteAllText(codeFilePath1, codeFileContents1);
-			File.WriteAllText(codeFilePath2, codeFileContents2);
+			var codeFilePath1 = createFileInRepository("repo", "test1.txt", "test-contents-1");
+			var codeFilePath2 = createFileInRepository("repo", "test2.txt", "test-contents-2");
 
 			_ingester.Ingest();
 
-			CodeFile[] ingestedCodeFiles;
-
-			using (var session = _documentStore.OpenSession())
-			{
-				ingestedCodeFiles = session.Query<CodeFile>().ToArray();
-			}
+			var ingestedCodeFiles = savedCodeFiles();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
-
-			Assert.That(ingestedCodeFiles[0].Filename, Is.EqualTo(codeFileName1));
-			Assert.That(ingestedCodeFiles[0].FullPath, Is.EqualTo(codeFilePath1));
-			Assert.That(ingestedCodeFiles[0].Content, Is.EqualTo(codeFileContents1));
-
-			Assert.That(ingestedCodeFiles[1].Filename, Is.EqualTo(codeFileName2));
-			Assert.That(ingestedCodeFiles[1].FullPath, Is.EqualTo(codeFilePath2));
-			Assert.That(ingestedCodeFiles[1].Content, Is.EqualTo(codeFileContents2));
+			asssertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "test-contents-1");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "test-contents-2");
 		}
 
-		private void createRepositoryFolder(string repositoryName)
+		private string createFileInRepository(string repositoryName, string filename, string fileContents)
 		{
-			Directory.CreateDirectory(Path.Combine(_tempWorkingFolder, repositoryName));
+			var repositoryPath = Path.Combine(_tempWorkingFolder, repositoryName);
+			var codeFilePath = Path.Combine(repositoryPath, filename);
+
+			Directory.CreateDirectory(repositoryPath);
+			File.WriteAllText(codeFilePath, fileContents);
+
+			return codeFilePath;
+		}
+
+		private CodeFile[] savedCodeFiles()
+		{
+			using (var session = _documentStore.OpenSession())
+			{
+				return session.Query<CodeFile>().ToArray();
+			}
+		}
+
+		private static void asssertCodeFileIsCorrect(CodeFile codeFile, string expectedPath, string expectedContents)
+		{
+			Assert.That(codeFile.Filename, Is.EqualTo(Path.GetFileName(expectedPath)));
+			Assert.That(codeFile.FullPath, Is.EqualTo(expectedPath));
+			Assert.That(codeFile.Content, Is.EqualTo(expectedContents));
 		}
 	}
 
