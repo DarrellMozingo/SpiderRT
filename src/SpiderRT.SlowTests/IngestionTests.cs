@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -60,6 +61,42 @@ namespace SpiderRT.SlowTests
 			Assert.That(ingestedCodeFile.Filename, Is.EqualTo(codeFileName));
 			Assert.That(ingestedCodeFile.FullPath, Is.EqualTo(codeFilePath));
 			Assert.That(ingestedCodeFile.Content, Is.EqualTo(codeFileContents));
+		}
+
+		[Test]
+		public void Should_ingest_two_files_in_a_single_folder()
+		{
+			const string repositoryName = "repo1";
+			const string codeFileName1 = "test1.txt";
+			const string codeFileName2 = "test2.txt";
+			const string codeFileContents1 = "test-contents-1";
+			const string codeFileContents2 = "test-contents-2";
+
+			var codeFilePath1 = Path.Combine(_tempWorkingFolder, repositoryName, codeFileName1);
+			var codeFilePath2 = Path.Combine(_tempWorkingFolder, repositoryName, codeFileName2);
+
+			createRepositoryFolder(repositoryName);
+			File.WriteAllText(codeFilePath1, codeFileContents1);
+			File.WriteAllText(codeFilePath2, codeFileContents2);
+
+			_ingester.Ingest();
+
+			CodeFile[] ingestedCodeFiles;
+
+			using (var session = _documentStore.OpenSession())
+			{
+				ingestedCodeFiles = session.Query<CodeFile>().ToArray();
+			}
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
+
+			Assert.That(ingestedCodeFiles[0].Filename, Is.EqualTo(codeFileName1));
+			Assert.That(ingestedCodeFiles[0].FullPath, Is.EqualTo(codeFilePath1));
+			Assert.That(ingestedCodeFiles[0].Content, Is.EqualTo(codeFileContents1));
+
+			Assert.That(ingestedCodeFiles[1].Filename, Is.EqualTo(codeFileName2));
+			Assert.That(ingestedCodeFiles[1].FullPath, Is.EqualTo(codeFilePath2));
+			Assert.That(ingestedCodeFiles[1].Content, Is.EqualTo(codeFileContents2));
 		}
 
 		private void createRepositoryFolder(string repositoryName)
