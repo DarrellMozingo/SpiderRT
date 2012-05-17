@@ -40,7 +40,8 @@ namespace SpiderRT.SlowTests
 		[Test]
 		public void Should_ingest_a_single_file_in_a_single_folder()
 		{
-			File.WriteAllText(_tempWorkingFolder + "\\test.txt", "test-contents");
+			Directory.CreateDirectory(_tempWorkingFolder + "\\repo1");
+			File.WriteAllText(_tempWorkingFolder + "\\repo1\\test.txt", "test-contents");
 
 			_ingester.Ingest();
 
@@ -53,7 +54,7 @@ namespace SpiderRT.SlowTests
 
 			Assert.That(ingestedCodeFile, Is.Not.Null, "No file was ingested.");
 			Assert.That(ingestedCodeFile.Filename, Is.EqualTo("test.txt"));
-			Assert.That(ingestedCodeFile.FullPath, Is.EqualTo(_tempWorkingFolder + "\\test.txt"));
+			Assert.That(ingestedCodeFile.FullPath, Is.EqualTo(_tempWorkingFolder + "\\repo1\\test.txt"));
 			Assert.That(ingestedCodeFile.Content, Is.EqualTo("test-contents"));
 		}
 	}
@@ -73,7 +74,7 @@ namespace SpiderRT.SlowTests
 			{
 				var workingFolder = session.Query<Settings>().First().WorkingFolder;
 
-				Directory.EnumerateFiles(workingFolder)
+				Directory.EnumerateFiles(workingFolder, "*", SearchOption.AllDirectories)
 					.ForEach(filePath =>
 					         session.Store(new CodeFile
 					         {
