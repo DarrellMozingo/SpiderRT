@@ -64,6 +64,40 @@ namespace SpiderRT.SlowTests
 			asssertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "test-contents-2");
 		}
 
+		[Test]
+		public void Should_ingest_two_files_in_two_folders()
+		{
+			var codeFilePath1 = createFileInRepository("repo1", "test1.txt", "test-contents-1");
+			var codeFilePath2 = createFileInRepository("repo2", "test2.txt", "test-contents-2");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = savedCodeFiles();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
+			asssertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "test-contents-1");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "test-contents-2");
+		}
+
+		[Test]
+		public void Should_ingest_four_files_in_two_folders()
+		{
+			var codeFilePath1 = createFileInRepository("repo1", "test1.txt", "test-contents-1");
+			var codeFilePath2 = createFileInRepository("repo1", "test2.txt", "test-contents-2");
+			var codeFilePath3 = createFileInRepository("repo2", "test3.txt", "test-contents-3");
+			var codeFilePath4 = createFileInRepository("repo2", "test4.txt", "test-contents-4");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = savedCodeFiles();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(4));
+			asssertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "test-contents-1");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "test-contents-2");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[2], codeFilePath3, "test-contents-3");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[3], codeFilePath4, "test-contents-4");
+		}
+
 		private string createFileInRepository(string repositoryName, string filename, string fileContents)
 		{
 			var repositoryPath = Path.Combine(_tempWorkingFolder, repositoryName);
