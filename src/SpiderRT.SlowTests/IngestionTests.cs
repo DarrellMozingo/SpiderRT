@@ -37,7 +37,7 @@ namespace SpiderRT.SlowTests
 		}
 
 		[Test]
-		public void Should_ingest_a_single_file_in_a_single_folder()
+		public void Should_ingest_a_single_new_file_in_a_single_folder()
 		{
 			var codeFilePath = createFileInRepository("repo", "test.txt", "test-contents");
 
@@ -50,7 +50,7 @@ namespace SpiderRT.SlowTests
 		}
 
 		[Test]
-		public void Should_ingest_two_files_in_a_single_folder()
+		public void Should_ingest_two_new_files_in_a_single_folder()
 		{
 			var codeFilePath1 = createFileInRepository("repo", "test1.txt", "test-contents-1");
 			var codeFilePath2 = createFileInRepository("repo", "test2.txt", "test-contents-2");
@@ -65,7 +65,7 @@ namespace SpiderRT.SlowTests
 		}
 
 		[Test]
-		public void Should_ingest_two_files_in_two_folders()
+		public void Should_ingest_two_new_files_in_two_folders()
 		{
 			var codeFilePath1 = createFileInRepository("repo1", "test1.txt", "test-contents-1");
 			var codeFilePath2 = createFileInRepository("repo2", "test2.txt", "test-contents-2");
@@ -80,7 +80,7 @@ namespace SpiderRT.SlowTests
 		}
 
 		[Test]
-		public void Should_ingest_four_files_in_two_folders()
+		public void Should_ingest_four_new_files_in_two_folders()
 		{
 			var codeFilePath1 = createFileInRepository("repo1", "test1.txt", "test-contents-1");
 			var codeFilePath2 = createFileInRepository("repo1", "test2.txt", "test-contents-2");
