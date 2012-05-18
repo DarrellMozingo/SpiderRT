@@ -44,7 +44,6 @@ namespace SpiderRT.SlowTests
 			_ingester.Ingest();
 
 			var ingestedCodeFile = savedCodeFiles().SingleOrDefault();
-			var ingestedCodeFile = savedCodeFiles().FirstOrDefault();
 
 			Assert.That(ingestedCodeFile, Is.Not.Null, "No file was ingested.");
 			asssertCodeFileIsCorrect(ingestedCodeFile, codeFilePath, "test-contents");
