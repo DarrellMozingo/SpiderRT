@@ -98,6 +98,41 @@ namespace SpiderRT.SlowTests
 			asssertCodeFileIsCorrect(ingestedCodeFiles[3], codeFilePath4, "test-contents-4");
 		}
 
+		[Test]
+		public void Should_reingest_a_single_existing_file_in_a_single_folder_by_matching_on_its_repository_and_file_path()
+		{
+			var codeFilePath = createFileInRepository("repo", "test.txt", "test-contents-new");
+			var existingCodeFile = createCodeFileInDatabase(codeFilePath, "test-contents-old");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFile = savedCodeFiles().SingleOrDefault();
+
+			Assert.That(ingestedCodeFile, Is.Not.Null, "No file was ingested.");
+			Assert.That(ingestedCodeFile.Id, Is.EqualTo(existingCodeFile.Id));
+			Assert.That(ingestedCodeFile.Filename, Is.EqualTo(existingCodeFile.Filename));
+			Assert.That(ingestedCodeFile.FullPath, Is.EqualTo(existingCodeFile.FullPath));
+			Assert.That(ingestedCodeFile.Content, Is.EqualTo("test-contents-new"));
+		}
+
+		private CodeFile createCodeFileInDatabase(string codeFilePath, string fileContents)
+		{
+			var newCodeFile = new CodeFile
+			{
+				Filename = Path.GetFileName(codeFilePath),
+				FullPath = codeFilePath,
+				Content = fileContents
+			};
+
+			using(var session = _documentStore.OpenSession())
+			{
+				session.Store(newCodeFile);
+				session.SaveChanges();
+			}
+
+			return newCodeFile;
+		}
+
 		private string createFileInRepository(string repositoryName, string filename, string fileContents)
 		{
 			var repositoryPath = Path.Combine(_tempWorkingFolder, repositoryName);
@@ -111,9 +146,11 @@ namespace SpiderRT.SlowTests
 
 		private CodeFile[] savedCodeFiles()
 		{
-			using (var session = _documentStore.OpenSession())
+			using(var session = _documentStore.OpenSession())
 			{
-				return session.Query<CodeFile>().ToArray();
+				return session.Query<CodeFile>()
+					.Customize(x => x.WaitForNonStaleResults())
+					.ToArray();
 			}
 		}
 
@@ -140,15 +177,29 @@ namespace SpiderRT.SlowTests
 			using(var session = _documentStore.OpenSession())
 			{
 				var workingFolder = session.Query<Settings>().First().WorkingFolder;
+				var existingCodeFiles = session.Query<CodeFile>().ToList();
 
 				Directory.EnumerateFiles(workingFolder, "*", SearchOption.AllDirectories)
 					.ForEach(filePath =>
-					         session.Store(new CodeFile
 					         {
-					         	Content = File.ReadAllText(filePath),
-					         	Filename = Path.GetFileName(filePath),
-					         	FullPath = filePath
-					         }));
+					         	var fileContents = File.ReadAllText(filePath);
+					         	var existingCodeFile = existingCodeFiles.SingleOrDefault(x => x.FullPath == filePath);
+
+					         	if(existingCodeFile != null)
+					         	{
+					         		existingCodeFile.Content = fileContents;
+					         	}
+					         	else
+					         	{
+					         		session.Store(new CodeFile
+					         		{
+					         			Id = Guid.NewGuid(),
+					         			Content = fileContents,
+					         			Filename = Path.GetFileName(filePath),
+					         			FullPath = filePath
+					         		});
+					         	}
+					         });
 
 				session.SaveChanges();
 			}
