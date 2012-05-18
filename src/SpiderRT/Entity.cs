@@ -6,11 +6,6 @@ namespace SpiderRT
 	{
 		public Guid Id { get; set; }
 
-		public Entity()
-		{
-			Id = Guid.NewGuid();
-		}
-
 		#region Equality
 		public bool Equals(Entity other)
 		{

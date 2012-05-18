@@ -119,6 +119,7 @@ namespace SpiderRT.SlowTests
 
 		private static void asssertCodeFileIsCorrect(CodeFile codeFile, string expectedPath, string expectedContents)
 		{
+			Assert.That(codeFile.Id, Is.Not.EqualTo(Guid.Empty));
 			Assert.That(codeFile.Filename, Is.EqualTo(Path.GetFileName(expectedPath)));
 			Assert.That(codeFile.FullPath, Is.EqualTo(expectedPath));
 			Assert.That(codeFile.Content, Is.EqualTo(expectedContents));
