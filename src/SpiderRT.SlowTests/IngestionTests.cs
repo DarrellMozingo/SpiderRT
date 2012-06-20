@@ -333,10 +333,12 @@ namespace SpiderRT.SlowTests
 				});
 		}
 
-		private bool fileIsNotBlackListed(FileSystemInfo fullPath)
+		private bool fileIsNotBlackListed(FileSystemInfo fileInfo)
 		{
-			var extensionIsBlackListed = _settings.BlockedExtensions.Any(ext => ext.ToLower() == Path.GetExtension(fullPath.Name.ToLower()));
-			var pathIsBlackListed = _settings.BlockedPaths.Any(blockedPath => fullPath.FullName.ToLower().Contains(blockedPath.ToLower()));
+			var filePath = fileInfo.FullName.ToLower();
+
+			var extensionIsBlackListed = _settings.BlockedExtensions.Any(extension => extension.ToLower() == Path.GetExtension(filePath));
+			var pathIsBlackListed = _settings.BlockedPaths.Any(blockedPath => filePath.Contains(blockedPath.ToLower()));
 
 			return (extensionIsBlackListed || pathIsBlackListed) == false;
 		}
