@@ -198,6 +198,22 @@ namespace SpiderRT.SlowTests
 			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-3");
 		}
 
+		[Test]
+		public void Should_ignore_case_when_blocking_by_path()
+		{
+			createFileInRepository("BLOCKED-path", "test.txt", "random-content-1");
+			var allowedCodeFilePath = createFileInRepository("allowed-path", "test2.txt", "random-content-2");
+
+			setBlockedPaths("blocked-PATH");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = codeFilesThatWereSaved();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed path should have been ingested");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
+		}
+
 		private void setBlockedPaths(params string[] blockedPath)
 		{
 			changeSettings(settings => settings.BlockedPaths = new List<string>(blockedPath));
@@ -320,7 +336,7 @@ namespace SpiderRT.SlowTests
 		private bool fileIsNotBlackListed(FileSystemInfo fullPath)
 		{
 			var extensionIsBlackListed = _settings.BlockedExtensions.Any(ext => ext.ToLower() == Path.GetExtension(fullPath.Name.ToLower()));
-			var pathIsBlackListed = _settings.BlockedPaths.Any(fullPath.FullName.Contains);
+			var pathIsBlackListed = _settings.BlockedPaths.Any(blockedPath => fullPath.FullName.ToLower().Contains(blockedPath.ToLower()));
 
 			return (extensionIsBlackListed || pathIsBlackListed) == false;
 		}
