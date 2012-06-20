@@ -117,7 +117,7 @@ namespace SpiderRT.SlowTests
 		}
 
 		[Test]
-		public void Should_not_ingest_a_single_file_with_a_blocked_file_extension()
+		public void Should_not_ingest_a_file_with_a_blocked_file_extension()
 		{
 			createFileInRepository("repo", "test.blockedExtension", "random-content-1");
 			var allowedCodeFilePath = createFileInRepository("repo", "test.allowedExtension", "random-content-2");
@@ -132,13 +132,30 @@ namespace SpiderRT.SlowTests
 			asssertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
 		}
 
-		private void setBlockedExtensions(string extension)
+		[Test]
+		public void Should_not_ingest_multiple_files_with_a_blocked_file_extensions()
+		{
+			createFileInRepository("repo", "test1.blockedExtension1", "random-content-1");
+			createFileInRepository("repo", "test2.blockedExtension2", "random-content-2");
+			var allowedCodeFilePath = createFileInRepository("repo", "test.allowedExtension", "random-content-3");
+
+			setBlockedExtensions(".blockedExtension1", ".blockedExtension2");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = savedCodeFiles();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed extension should have been ingested");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-3");
+		}
+
+		private void setBlockedExtensions(params string[] blockedExtensions)
 		{
 			using (var session = _documentStore.OpenSession())
 			{
 				var settings = session.Query<Settings>().Single();
 
-				settings.BlockedExtensions = new List<string> { extension };
+				settings.BlockedExtensions = new List<string>(blockedExtensions);
 				session.SaveChanges();
 			}
 		}
@@ -208,7 +225,7 @@ namespace SpiderRT.SlowTests
 				var existingCodeFiles = session.Query<CodeFile>().ToList();
 
 				Directory.EnumerateFiles(settings.WorkingFolder, "*", SearchOption.AllDirectories)
-					.Where(fullPath => settings.BlockedExtensions.FirstOrDefault() == Path.GetExtension(fullPath) == false)
+					.Where(fullPath => settings.BlockedExtensions.Any(ext => ext == Path.GetExtension(fullPath)) == false)
 					.ForEach(filePath =>
 					         {
 					         	var fileContents = File.ReadAllText(filePath);
