@@ -269,14 +269,15 @@ namespace SpiderRT.SlowTests
 				var existingCodeFiles = session.Query<CodeFile>().ToList();
 
 				Directory.EnumerateFiles(settings.WorkingFolder, "*", SearchOption.AllDirectories)
+					.Select(fullPath => new FileInfo(fullPath))
 					.Where(fullPath =>
-							settings.BlockedExtensions.Any(ext => ext == Path.GetExtension(fullPath)) == false &&
-					       	settings.BlockedPaths.Any(fullPath.Contains) == false
+							settings.BlockedExtensions.Any(ext => ext == Path.GetExtension(fullPath.Name)) == false &&
+					       	settings.BlockedPaths.Any(fullPath.FullName.Contains) == false
 					       )
 					.ForEach(filePath =>
 					         {
-					         	var fileContents = File.ReadAllText(filePath);
-					         	var existingCodeFile = existingCodeFiles.SingleOrDefault(x => x.FullPath == filePath);
+					         	var fileContents = File.ReadAllText(filePath.FullName);
+					         	var existingCodeFile = existingCodeFiles.SingleOrDefault(x => x.FullPath == filePath.FullName);
 
 					         	if(existingCodeFile != null)
 					         	{
@@ -288,8 +289,8 @@ namespace SpiderRT.SlowTests
 					         		{
 					         			Id = Guid.NewGuid(),
 					         			Content = fileContents,
-					         			Filename = Path.GetFileName(filePath),
-					         			FullPath = filePath
+					         			Filename = Path.GetFileName(filePath.Name),
+					         			FullPath = filePath.FullName
 					         		});
 					         	}
 					         });
