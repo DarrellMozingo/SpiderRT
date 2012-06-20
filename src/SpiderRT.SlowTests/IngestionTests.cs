@@ -255,6 +255,7 @@ namespace SpiderRT.SlowTests
 	public class Ingester
 	{
 		private readonly IDocumentStore _documentStore;
+		private Settings _settings;
 
 		public Ingester(IDocumentStore documentStore)
 		{
@@ -265,38 +266,48 @@ namespace SpiderRT.SlowTests
 		{
 			using(var session = _documentStore.OpenSession())
 			{
-				var settings = session.Query<Settings>().Single();
+				_settings = session.Query<Settings>().Single();
 				var existingCodeFiles = session.Query<CodeFile>().ToList();
 
-				Directory.EnumerateFiles(settings.WorkingFolder, "*", SearchOption.AllDirectories)
-					.Select(fullPath => new FileInfo(fullPath))
-					.Where(fullPath =>
-							settings.BlockedExtensions.Any(ext => ext == Path.GetExtension(fullPath.Name)) == false &&
-					       	settings.BlockedPaths.Any(fullPath.FullName.Contains) == false
-					       )
-					.ForEach(filePath =>
+				getFilesToIngest()
+					.ForEach(codeFile =>
 					         {
-					         	var fileContents = File.ReadAllText(filePath.FullName);
-					         	var existingCodeFile = existingCodeFiles.SingleOrDefault(x => x.FullPath == filePath.FullName);
+					         	var existingCodeFile = existingCodeFiles.SingleOrDefault(x => x.FullPath == codeFile.FullPath);
 
 					         	if(existingCodeFile != null)
 					         	{
-					         		existingCodeFile.Content = fileContents;
+					         		existingCodeFile.Content = codeFile.Content;
 					         	}
 					         	else
 					         	{
-					         		session.Store(new CodeFile
-					         		{
-					         			Id = Guid.NewGuid(),
-					         			Content = fileContents,
-					         			Filename = Path.GetFileName(filePath.Name),
-					         			FullPath = filePath.FullName
-					         		});
+					         		session.Store(codeFile);
 					         	}
 					         });
 
 				session.SaveChanges();
 			}
+		}
+
+		private IEnumerable<CodeFile> getFilesToIngest()
+		{
+			return Directory.EnumerateFiles(_settings.WorkingFolder, "*", SearchOption.AllDirectories)
+				.Select(fullPath => new FileInfo(fullPath))
+				.Where(fileIsNotBlackListed)
+				.Select(file => new CodeFile
+				{
+					Id = Guid.NewGuid(),
+					Content = File.ReadAllText(file.FullName),
+					Filename = Path.GetFileName(file.Name),
+					FullPath = file.FullName
+				});
+		}
+
+		private bool fileIsNotBlackListed(FileSystemInfo fullPath)
+		{
+			var extensionIsBlackListed = _settings.BlockedExtensions.Any(ext => ext == Path.GetExtension(fullPath.Name));
+			var pathIsBlackListed = _settings.BlockedPaths.Any(fullPath.FullName.Contains);
+
+			return (extensionIsBlackListed || pathIsBlackListed) == false;
 		}
 	}
 }
