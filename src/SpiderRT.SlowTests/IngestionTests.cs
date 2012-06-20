@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -115,6 +116,33 @@ namespace SpiderRT.SlowTests
 			Assert.That(ingestedCodeFile.Content, Is.EqualTo("test-contents-new"));
 		}
 
+		[Test]
+		public void Should_not_ingest_a_single_file_with_a_blocked_file_extension()
+		{
+			createFileInRepository("repo", "test.blockedExtension", "random-content-1");
+			var allowedCodeFilePath = createFileInRepository("repo", "test.allowedExtension", "random-content-2");
+
+			setBlockedExtensions(".blockedExtension");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = savedCodeFiles();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed extension should have been ingested");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
+		}
+
+		private void setBlockedExtensions(string extension)
+		{
+			using (var session = _documentStore.OpenSession())
+			{
+				var settings = session.Query<Settings>().Single();
+
+				settings.BlockedExtensions = new List<string> { extension };
+				session.SaveChanges();
+			}
+		}
+
 		private CodeFile createCodeFileInDatabase(string codeFilePath, string fileContents)
 		{
 			var newCodeFile = new CodeFile
@@ -176,10 +204,11 @@ namespace SpiderRT.SlowTests
 		{
 			using(var session = _documentStore.OpenSession())
 			{
-				var workingFolder = session.Query<Settings>().First().WorkingFolder;
+				var settings = session.Query<Settings>().Single();
 				var existingCodeFiles = session.Query<CodeFile>().ToList();
 
-				Directory.EnumerateFiles(workingFolder, "*", SearchOption.AllDirectories)
+				Directory.EnumerateFiles(settings.WorkingFolder, "*", SearchOption.AllDirectories)
+					.Where(fullPath => settings.BlockedExtensions.FirstOrDefault() == Path.GetExtension(fullPath) == false)
 					.ForEach(filePath =>
 					         {
 					         	var fileContents = File.ReadAllText(filePath);
