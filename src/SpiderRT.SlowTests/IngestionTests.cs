@@ -145,8 +145,35 @@ namespace SpiderRT.SlowTests
 
 			var ingestedCodeFiles = savedCodeFiles();
 
-			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed extension should have been ingested");
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed extensions should have been ingested");
 			asssertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-3");
+		}
+
+		[Test]
+		public void Should_not_ingest_files_with_a_single_blocked_path()
+		{
+			createFileInRepository("blocked-path", "test.txt", "random-content-1");
+			var allowedCodeFilePath = createFileInRepository("allowed-path", "test2.txt", "random-content-2");
+
+			setBlockedPath("blocked-path");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = savedCodeFiles();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed path should have been ingested");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
+		}
+
+		private void setBlockedPath(string blockedPath)
+		{
+			using (var session = _documentStore.OpenSession())
+			{
+				var settings = session.Query<Settings>().Single();
+
+				settings.BlockedPaths = new List<string> { blockedPath };
+				session.SaveChanges();
+			}
 		}
 
 		private void setBlockedExtensions(params string[] blockedExtensions)
@@ -225,7 +252,10 @@ namespace SpiderRT.SlowTests
 				var existingCodeFiles = session.Query<CodeFile>().ToList();
 
 				Directory.EnumerateFiles(settings.WorkingFolder, "*", SearchOption.AllDirectories)
-					.Where(fullPath => settings.BlockedExtensions.Any(ext => ext == Path.GetExtension(fullPath)) == false)
+					.Where(fullPath =>
+							settings.BlockedExtensions.Any(ext => ext == Path.GetExtension(fullPath)) == false &&
+					       	(settings.BlockedPaths.Any() ? fullPath.Contains(settings.BlockedPaths.FirstOrDefault()) == false : true)
+					       )
 					.ForEach(filePath =>
 					         {
 					         	var fileContents = File.ReadAllText(filePath);
