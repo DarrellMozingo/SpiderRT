@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="CodeFile.cs" />
     <Compile Include="Entity.cs" />
+    <Compile Include="Ingester.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="HelperExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
