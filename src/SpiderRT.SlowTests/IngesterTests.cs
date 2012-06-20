@@ -9,7 +9,7 @@ using Raven.Client.Embedded;
 
 namespace SpiderRT.SlowTests
 {
-	public class IngestionTests
+	public class IngesterTests
 	{
 		private IDocumentStore _documentStore;
 		private Ingester _ingester;
