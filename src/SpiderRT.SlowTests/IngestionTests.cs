@@ -117,7 +117,7 @@ namespace SpiderRT.SlowTests
 		}
 
 		[Test]
-		public void Should_not_ingest_a_file_with_a_blocked_file_extension()
+		public void Should_not_ingest_files_with_a_single_blocked_file_extension()
 		{
 			createFileInRepository("repo", "test.blockedExtension", "random-content-1");
 			var allowedCodeFilePath = createFileInRepository("repo", "test.allowedExtension", "random-content-2");
@@ -133,7 +133,7 @@ namespace SpiderRT.SlowTests
 		}
 
 		[Test]
-		public void Should_not_ingest_multiple_files_with_a_blocked_file_extensions()
+		public void Should_not_ingest_files_with_multiple_blocked_file_extensions()
 		{
 			createFileInRepository("repo", "test1.blockedExtension1", "random-content-1");
 			createFileInRepository("repo", "test2.blockedExtension2", "random-content-2");
