@@ -155,7 +155,7 @@ namespace SpiderRT.SlowTests
 			createFileInRepository("blocked-path", "test.txt", "random-content-1");
 			var allowedCodeFilePath = createFileInRepository("allowed-path", "test2.txt", "random-content-2");
 
-			setBlockedPath("blocked-path");
+			setBlockedPaths("blocked-path");
 
 			_ingester.Ingest();
 
@@ -165,13 +165,30 @@ namespace SpiderRT.SlowTests
 			asssertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
 		}
 
-		private void setBlockedPath(string blockedPath)
+		[Test]
+		public void Should_not_ingest_files_with_multiple_blocked_paths()
+		{
+			createFileInRepository("blocked-path-1", "test1.txt", "random-content-1");
+			createFileInRepository("blocked-path-2", "test2.txt", "random-content-2");
+			var allowedCodeFilePath = createFileInRepository("allowed-path", "test3.txt", "random-content-3");
+
+			setBlockedPaths("blocked-path-1", "blocked-path-2");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = savedCodeFiles();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed path should have been ingested");
+			asssertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-3");
+		}
+
+		private void setBlockedPaths(params string[] blockedPath)
 		{
 			using (var session = _documentStore.OpenSession())
 			{
 				var settings = session.Query<Settings>().Single();
 
-				settings.BlockedPaths = new List<string> { blockedPath };
+				settings.BlockedPaths = new List<string>(blockedPath);
 				session.SaveChanges();
 			}
 		}
@@ -254,7 +271,7 @@ namespace SpiderRT.SlowTests
 				Directory.EnumerateFiles(settings.WorkingFolder, "*", SearchOption.AllDirectories)
 					.Where(fullPath =>
 							settings.BlockedExtensions.Any(ext => ext == Path.GetExtension(fullPath)) == false &&
-					       	(settings.BlockedPaths.Any() ? fullPath.Contains(settings.BlockedPaths.FirstOrDefault()) == false : true)
+					       	settings.BlockedPaths.Any(fullPath.Contains) == false
 					       )
 					.ForEach(filePath =>
 					         {
