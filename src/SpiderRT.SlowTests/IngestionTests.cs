@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Raven.Client;
 using Raven.Client.Embedded;
@@ -214,6 +215,23 @@ namespace SpiderRT.SlowTests
 			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
 		}
 
+		[Test]
+		public void Should_ingest_a_file_when_a_blocked_path_is_in_the_filename()
+		{
+			var allowedCodeFilePath1 = createFileInRepository("allowed-path", "blocked-path.txt", "random-content-1");
+			var allowedCodeFilePath2 = createFileInRepository("allowed-path", "test2.txt", "random-content-2");
+
+			setBlockedPaths("blocked-path");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = codeFilesThatWereSaved();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath1, "random-content-1");
+			assertCodeFileIsCorrect(ingestedCodeFiles[1], allowedCodeFilePath2, "random-content-2");
+		}
+
 		private void setBlockedPaths(params string[] blockedPath)
 		{
 			changeSettings(settings => settings.BlockedPaths = new List<string>(blockedPath));
@@ -338,7 +356,7 @@ namespace SpiderRT.SlowTests
 			var filePath = fileInfo.FullName.ToLower();
 
 			var extensionIsBlackListed = _settings.BlockedExtensions.Any(extension => extension.ToLower() == Path.GetExtension(filePath));
-			var pathIsBlackListed = _settings.BlockedPaths.Any(blockedPath => filePath.Contains(blockedPath.ToLower()));
+			var pathIsBlackListed = _settings.BlockedPaths.Any(blockedPath => Regex.IsMatch(filePath, string.Format(@"\\{0}\\", blockedPath.ToLower())));
 
 			return (extensionIsBlackListed || pathIsBlackListed) == false;
 		}
