@@ -13,10 +13,13 @@ namespace SpiderRT.SlowTests
 		private IDocumentStore _documentStore;
 		private Ingester _ingester;
 		private string _tempWorkingFolder;
+		private IList<string> _savedVcsRoots;
 
 		[SetUp]
 		public void Before_each_test()
 		{
+			_savedVcsRoots = new List<string>();
+
 			_documentStore = new EmbeddableDocumentStore { RunInMemory = true }.Initialize();
 
 			_tempWorkingFolder = Path.GetFullPath(Guid.NewGuid().ToString());
@@ -231,17 +234,50 @@ namespace SpiderRT.SlowTests
 			assertCodeFileIsCorrect(ingestedCodeFiles[1], allowedCodeFilePath2, "random-content-2");
 		}
 
+		[Test]
+		public void Should_ingest_and_set_the_version_control_root_name_and_url()
+		{
+			var path1 = createFileInRepository("valid-repo1", "file1.txt", "random-content-1");
+			var path2 = createFileInRepository("valid-repo2", "file2.txt", "random-content-2");
+
+			createFileJustOnDisk("non-repo", "file1.txt", "random-content-1");
+
+			_ingester.Ingest();
+
+			var ingestedCodeFiles = codeFilesThatWereSaved();
+
+			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], path1, "random-content-1");
+			assertCodeFileIsCorrect(ingestedCodeFiles[1], path2, "random-content-2");
+		}
+
+		private void addVcsRoots(params string[] repoNames)
+		{
+			using (var session = _documentStore.OpenSession())
+			{
+				var newRepoNamesForThisTest = repoNames.Where(repoName => _savedVcsRoots.Contains(repoName) == false);
+
+				foreach (var repoName in newRepoNamesForThisTest) 
+				{
+					_savedVcsRoots.Add(repoName);
+					session.Store(new VcsRoot { Name = repoName });
+				}
+
+				session.SaveChanges();
+			}
+		}
+
 		private void setBlockedPaths(params string[] blockedPath)
 		{
-			changeSettings(settings => settings.BlockedPaths = new List<string>(blockedPath));
+			editSettings(settings => settings.BlockedPaths = new List<string>(blockedPath));
 		}
 
 		private void setBlockedExtensions(params string[] blockedExtensions)
 		{
-			changeSettings(settings => settings.BlockedExtensions = new List<string>(blockedExtensions));
+			editSettings(settings => settings.BlockedExtensions = new List<string>(blockedExtensions));
 		}
 
-		private void changeSettings(Action<Settings> changeAction)
+		private void editSettings(Action<Settings> changeAction)
 		{
 			using (var session = _documentStore.OpenSession())
 			{
@@ -271,6 +307,12 @@ namespace SpiderRT.SlowTests
 		}
 
 		private string createFileInRepository(string repositoryName, string filename, string fileContents)
+		{
+			addVcsRoots(repositoryName);
+			return createFileJustOnDisk(repositoryName, filename, fileContents);
+		}
+
+		private string createFileJustOnDisk(string repositoryName, string filename, string fileContents)
 		{
 			var repositoryPath = Path.Combine(_tempWorkingFolder, repositoryName);
 			var codeFilePath = Path.Combine(repositoryPath, filename);

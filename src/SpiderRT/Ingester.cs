@@ -24,7 +24,9 @@ namespace SpiderRT
 				_settings = session.Query<Settings>().Single();
 				var existingCodeFiles = session.Query<CodeFile>().ToList();
 
-				getFilesToIngest()
+				var vcsRoots = session.Query<VcsRoot>().ToList();
+
+				getFilesToIngest(vcsRoots)
 					.ForEach(codeFile =>
 					         {
 					         	var existingCodeFile = existingCodeFiles.SingleOrDefault(x => x.FullPath == codeFile.FullPath);
@@ -43,9 +45,11 @@ namespace SpiderRT
 			}
 		}
 
-		private IEnumerable<CodeFile> getFilesToIngest()
+		private IEnumerable<CodeFile> getFilesToIngest(IEnumerable<VcsRoot> vcsRoots)
 		{
-			return Directory.EnumerateFiles(_settings.WorkingFolder, "*", SearchOption.AllDirectories)
+			return vcsRoots
+				.Select(vcsRoot => Path.Combine(_settings.WorkingFolder, vcsRoot.Name))
+				.SelectMany(vcsPath => Directory.EnumerateFiles(vcsPath, "*", SearchOption.AllDirectories))
 				.Select(fullPath => new FileInfo(fullPath))
 				.Where(fileIsNotBlackListed)
 				.Select(file => new CodeFile
