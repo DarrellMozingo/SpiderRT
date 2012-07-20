@@ -5,7 +5,6 @@ namespace SpiderRT
 		public string Filename { get; set; }
 		public string FullPath { get; set; }
 		public string Content { get; set; }
-		public string VcsName { get; set; }
-		public string VcsUrl { get; set; }
+		public VcsRoot VcsRoot { get; set; }
 	}
 }

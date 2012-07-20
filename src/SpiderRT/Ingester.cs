@@ -47,18 +47,27 @@ namespace SpiderRT
 
 		private IEnumerable<CodeFile> getFilesToIngest(IEnumerable<VcsRoot> vcsRoots)
 		{
-			return vcsRoots
-				.Select(vcsRoot => Path.Combine(_settings.WorkingFolder, vcsRoot.Name))
-				.SelectMany(vcsPath => Directory.EnumerateFiles(vcsPath, "*", SearchOption.AllDirectories))
-				.Select(fullPath => new FileInfo(fullPath))
-				.Where(fileIsNotBlackListed)
-				.Select(file => new CodeFile
-				{
-					Id = Guid.NewGuid(),
-					Content = File.ReadAllText(file.FullName),
-					Filename = Path.GetFileName(file.Name),
-					FullPath = file.FullName
-				});
+			var codeFiles = new List<CodeFile>();
+
+			foreach (var vcsRoot in vcsRoots)
+			{
+				var vcsPath = Path.Combine(_settings.WorkingFolder, vcsRoot.Name);
+
+				Directory.EnumerateFiles(vcsPath, "*", SearchOption.AllDirectories)
+					.Select(fullPath => new FileInfo(fullPath))
+					.Where(fileIsNotBlackListed)
+					.Select(file => new CodeFile
+					{
+						Id = Guid.NewGuid(),
+						Content = File.ReadAllText(file.FullName),
+						Filename = Path.GetFileName(file.Name),
+						FullPath = file.FullName,
+						VcsRoot = vcsRoot
+					})
+					.ForEach(codeFiles.Add);
+			}
+
+			return codeFiles;
 		}
 
 		private bool fileIsNotBlackListed(FileSystemInfo fileInfo)
