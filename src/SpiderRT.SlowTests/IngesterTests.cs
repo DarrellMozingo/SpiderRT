@@ -50,7 +50,7 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFile = codeFilesThatWereSaved().SingleOrDefault();
 
 			Assert.That(ingestedCodeFile, Is.Not.Null, "No file was ingested.");
-			assertCodeFileIsCorrect(ingestedCodeFile, codeFilePath, "repo", "test-contents");
+			assertCodeFileIsCorrect(ingestedCodeFile, codeFilePath, "test-contents");
 		}
 
 		[Test]
@@ -64,8 +64,8 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "repo", "test-contents-1");
-			assertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "repo", "test-contents-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "test-contents-1");
+			assertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "test-contents-2");
 		}
 
 		[Test]
@@ -79,8 +79,8 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "repo1", "test-contents-1");
-			assertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "repo2", "test-contents-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "test-contents-1");
+			assertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "test-contents-2");
 		}
 
 		[Test]
@@ -96,10 +96,10 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(4));
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "repo1", "test-contents-1");
-			assertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "repo1", "test-contents-2");
-			assertCodeFileIsCorrect(ingestedCodeFiles[2], codeFilePath3, "repo2", "test-contents-3");
-			assertCodeFileIsCorrect(ingestedCodeFiles[3], codeFilePath4, "repo2", "test-contents-4");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], codeFilePath1, "test-contents-1");
+			assertCodeFileIsCorrect(ingestedCodeFiles[1], codeFilePath2, "test-contents-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[2], codeFilePath3, "test-contents-3");
+			assertCodeFileIsCorrect(ingestedCodeFiles[3], codeFilePath4, "test-contents-4");
 		}
 
 		[Test]
@@ -132,7 +132,7 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed extension should have been ingested");
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "repo", "random-content-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
 		}
 
 		[Test]
@@ -149,7 +149,7 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed extensions should have been ingested");
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "repo", "random-content-3");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-3");
 		}
 
 		[Test]
@@ -165,7 +165,7 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed extension should have been ingested");
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "repo", "random-content-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
 		}
 
 		[Test]
@@ -181,7 +181,7 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed path should have been ingested");
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "allowed-path", "random-content-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
 		}
 
 		[Test]
@@ -198,7 +198,7 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed path should have been ingested");
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "allowed-path", "random-content-3");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-3");
 		}
 
 		[Test]
@@ -214,7 +214,7 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(1), "Only the allowed path should have been ingested");
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "allowed-path", "random-content-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath, "random-content-2");
 		}
 
 		[Test]
@@ -230,8 +230,8 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath1, "allowed-path", "random-content-1");
-			assertCodeFileIsCorrect(ingestedCodeFiles[1], allowedCodeFilePath2, "allowed-path", "random-content-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], allowedCodeFilePath1, "random-content-1");
+			assertCodeFileIsCorrect(ingestedCodeFiles[1], allowedCodeFilePath2, "random-content-2");
 		}
 
 		[Test]
@@ -247,8 +247,8 @@ namespace SpiderRT.SlowTests
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
 			Assert.That(ingestedCodeFiles.Length, Is.EqualTo(2));
-			assertCodeFileIsCorrect(ingestedCodeFiles[0], path1, "valid-repo1", "random-content-1");
-			assertCodeFileIsCorrect(ingestedCodeFiles[1], path2, "valid-repo2", "random-content-2");
+			assertCodeFileIsCorrect(ingestedCodeFiles[0], path1, "random-content-1");
+			assertCodeFileIsCorrect(ingestedCodeFiles[1], path2, "random-content-2");
 		}
 
 		private void addVcsRoot(string repoName)
@@ -333,13 +333,15 @@ namespace SpiderRT.SlowTests
 			}
 		}
 
-		private static void assertCodeFileIsCorrect(CodeFile codeFile, string expectedFullPath, string expectedRepoName, string expectedContents)
+		private static void assertCodeFileIsCorrect(CodeFile codeFile, string expectedFullPath, string expectedContents)
 		{
 			Assert.That(codeFile.Id, Is.Not.EqualTo(Guid.Empty));
 			Assert.That(codeFile.Filename, Is.EqualTo(Path.GetFileName(expectedFullPath)));
 			Assert.That(codeFile.FullPath, Is.EqualTo(expectedFullPath));
 			Assert.That(codeFile.Content, Is.EqualTo(expectedContents));
 			Assert.That(codeFile.VcsRoot, Is.Not.Null);
+
+			var expectedRepoName = Path.GetDirectoryName(expectedFullPath).Split(Path.DirectorySeparatorChar).Last();
 			Assert.That(codeFile.VcsRoot.Name, Is.EqualTo(expectedRepoName));
 		}
 	}
