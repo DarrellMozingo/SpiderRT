@@ -1,6 +1,6 @@
 namespace SpiderRT
 {
-	public interface IVcs
+	public interface IVcsManager
 	{
 		void CreateOrUpdate();
 	}

@@ -73,7 +73,7 @@
   <ItemGroup>
     <Compile Include="HelperExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VcsManagerTests.cs" />
+    <Compile Include="VcsControllerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
