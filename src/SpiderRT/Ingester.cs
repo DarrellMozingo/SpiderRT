@@ -7,7 +7,12 @@ using Raven.Client;
 
 namespace SpiderRT
 {
-	public class Ingester
+	public interface IIngester 
+	{
+		void Ingest(Settings settings, IEnumerable<VcsRoot> vcsRoots);
+	}
+
+	public class Ingester : IIngester
 	{
 		private readonly IDocumentStore _documentStore;
 		private Settings _settings;
@@ -17,14 +22,13 @@ namespace SpiderRT
 			_documentStore = documentStore;
 		}
 
-		public void Ingest()
+		public void Ingest(Settings settings, IEnumerable<VcsRoot> vcsRoots)
 		{
+			_settings = settings;
+
 			using(var session = _documentStore.OpenSession())
 			{
-				_settings = session.Query<Settings>().Single();
 				var existingCodeFiles = session.Query<CodeFile>().ToList();
-
-				var vcsRoots = session.Query<VcsRoot>().ToList();
 
 				getFilesToIngest(vcsRoots)
 					.ForEach(codeFile =>

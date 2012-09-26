@@ -13,23 +13,21 @@ namespace SpiderRT.SlowTests
 		private IDocumentStore _documentStore;
 		private Ingester _ingester;
 		private string _tempWorkingFolder;
-		private IList<string> _savedVcsRoots;
+		private IList<VcsRoot> _vcsRoots;
+		private IList<string> _blockedPaths;
+		private IList<string> _blockedExtensions;
 
 		[SetUp]
 		public void Before_each_test()
 		{
-			_savedVcsRoots = new List<string>();
+			_vcsRoots = new List<VcsRoot>();
+			_blockedPaths = new List<string>();
+			_blockedExtensions = new List<string>();
 
 			_documentStore = new EmbeddableDocumentStore { RunInMemory = true }.Initialize();
 
 			_tempWorkingFolder = Path.GetFullPath(Guid.NewGuid().ToString());
 			Directory.CreateDirectory(_tempWorkingFolder);
-
-			using(var session = _documentStore.OpenSession())
-			{
-				session.Store(new Settings { WorkingFolder = _tempWorkingFolder });
-				session.SaveChanges();
-			}
 
 			_ingester = new Ingester(_documentStore);
 		}
@@ -45,7 +43,7 @@ namespace SpiderRT.SlowTests
 		{
 			var codeFilePath = createFileInRepository("repo", "test.txt", "test-contents");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFile = codeFilesThatWereSaved().SingleOrDefault();
 
@@ -59,7 +57,7 @@ namespace SpiderRT.SlowTests
 			var codeFilePath1 = createFileInRepository("repo", "test1.txt", "test-contents-1");
 			var codeFilePath2 = createFileInRepository("repo", "test2.txt", "test-contents-2");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -74,7 +72,7 @@ namespace SpiderRT.SlowTests
 			var codeFilePath1 = createFileInRepository("repo1", "test1.txt", "test-contents-1");
 			var codeFilePath2 = createFileInRepository("repo2", "test2.txt", "test-contents-2");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -91,7 +89,7 @@ namespace SpiderRT.SlowTests
 			var codeFilePath3 = createFileInRepository("repo2", "test3.txt", "test-contents-3");
 			var codeFilePath4 = createFileInRepository("repo2", "test4.txt", "test-contents-4");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -108,7 +106,7 @@ namespace SpiderRT.SlowTests
 			var codeFilePath = createFileInRepository("repo", "test.txt", "test-contents-new");
 			var existingCodeFile = createCodeFileInDatabase(codeFilePath, "test-contents-old");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFile = codeFilesThatWereSaved().SingleOrDefault();
 
@@ -127,7 +125,7 @@ namespace SpiderRT.SlowTests
 
 			setBlockedExtensions(".blockedExtension");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -144,7 +142,7 @@ namespace SpiderRT.SlowTests
 
 			setBlockedExtensions(".blockedExtension1", ".blockedExtension2");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -160,7 +158,7 @@ namespace SpiderRT.SlowTests
 
 			setBlockedExtensions(".blockedEXTENSION");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -176,7 +174,7 @@ namespace SpiderRT.SlowTests
 
 			setBlockedPaths("blocked-path");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -193,7 +191,7 @@ namespace SpiderRT.SlowTests
 
 			setBlockedPaths("blocked-path-1", "blocked-path-2");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -209,7 +207,7 @@ namespace SpiderRT.SlowTests
 
 			setBlockedPaths("blocked-PATH");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -225,7 +223,7 @@ namespace SpiderRT.SlowTests
 
 			setBlockedPaths("blocked-path");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -242,7 +240,7 @@ namespace SpiderRT.SlowTests
 
 			createFileJustOnDisk("non-repo", "file1.txt", "random-content-1");
 
-			_ingester.Ingest();
+			ingest();
 
 			var ingestedCodeFiles = codeFilesThatWereSaved();
 
@@ -251,41 +249,36 @@ namespace SpiderRT.SlowTests
 			assertCodeFileIsCorrect(ingestedCodeFiles[1], path2, "random-content-2");
 		}
 
+		private void ingest()
+		{
+			var settings = new Settings
+			{
+				WorkingFolder = _tempWorkingFolder,
+				BlockedPaths = _blockedPaths,
+ 				BlockedExtensions = _blockedExtensions
+			};
+
+			_ingester.Ingest(settings, _vcsRoots);
+		}
+
 		private void addVcsRoot(string repoName)
 		{
-			using (var session = _documentStore.OpenSession())
+			if (_vcsRoots.Select(x => x.Name).Contains(repoName))
 			{
-				if (_savedVcsRoots.Contains(repoName))
-				{
-					return;
-				}
-
-				_savedVcsRoots.Add(repoName);
-				session.Store(new VcsRoot { Name = repoName });
-				
-				session.SaveChanges();
+				return;
 			}
+
+			_vcsRoots.Add(new VcsRoot{Name = repoName});
 		}
 
 		private void setBlockedPaths(params string[] blockedPath)
 		{
-			editSettings(settings => settings.BlockedPaths = new List<string>(blockedPath));
+			_blockedPaths = new List<string>(blockedPath);
 		}
 
 		private void setBlockedExtensions(params string[] blockedExtensions)
 		{
-			editSettings(settings => settings.BlockedExtensions = new List<string>(blockedExtensions));
-		}
-
-		private void editSettings(Action<Settings> changeAction)
-		{
-			using (var session = _documentStore.OpenSession())
-			{
-				var settings = session.Query<Settings>().Single();
-
-				changeAction(settings);
-				session.SaveChanges();
-			}
+			_blockedExtensions = new List<string>(blockedExtensions);
 		}
 
 		private CodeFile createCodeFileInDatabase(string codeFilePath, string fileContents)
