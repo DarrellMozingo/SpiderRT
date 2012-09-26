@@ -99,10 +99,13 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Taskie">
+      <HintPath>..\packages\Taskie.0.130\lib\net40\Taskie.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GitManagerTests.cs" />
-    <Compile Include="IndexerControllerTests.cs" />
+    <Compile Include="IndexTaskTests.cs" />
     <Compile Include="IngesterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

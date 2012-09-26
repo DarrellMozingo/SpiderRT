@@ -1,9 +1,13 @@
-﻿namespace SpiderRT.Indexer
+﻿using Taskie;
+
+namespace SpiderRT.Indexer
 {
-	class Program
+	public class Program
 	{
-		static void Main(string[] args)
+		public static void Main(string[] args)
 		{
+			IoC.Bootstrap();
+			TaskieRunner.RunWith(args, new TaskieServiceLocator());
 		}
 	}
 }
