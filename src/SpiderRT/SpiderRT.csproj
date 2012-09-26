@@ -71,10 +71,11 @@
     <Compile Include="CodeFile.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Ingester.cs" />
+    <Compile Include="IVcs.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="HelperExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VcsInfo.cs" />
+    <Compile Include="Git.cs" />
     <Compile Include="VcsRoot.cs" />
   </ItemGroup>
   <ItemGroup>

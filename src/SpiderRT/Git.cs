@@ -4,26 +4,29 @@ using System.IO;
 
 namespace SpiderRT
 {
-	public class VcsInfo
+	public class Git : IVcs
 	{
-		private readonly Settings _settings;
+		private readonly string _workingFolder;
+		private readonly string _gitPath;
+		private readonly string _url;
+		private readonly string _name;
 
-		public string Url { get; set; }
-		public string Name { get; set; }
-
-		public string LocalPath
+		private string LocalPath
 		{
-			get { return Path.Combine(_settings.WorkingFolder, Name); }
+			get { return Path.Combine(_workingFolder, _name); }
 		}
 
-		public VcsInfo(Settings settings)
+		public Git(string workingFolder, string gitPath, string url, string name)
 		{
-			_settings = settings;
+			_workingFolder = workingFolder;
+			_gitPath = gitPath;
+			_url = url;
+			_name = name;
 		}
 
 		public void CreateOrUpdate()
 		{
-			if(exists())
+			if (exists())
 			{
 				update();
 			}
@@ -47,9 +50,9 @@ namespace SpiderRT
 
 		private void create()
 		{
-			var gitCloneCommand = string.Format("clone {0} {1}", Url, Name);
+			var gitCloneCommand = string.Format("clone {0} {1}", _url, _name);
 
-			execute(gitCloneCommand, _settings.WorkingFolder);
+			execute(gitCloneCommand, _workingFolder);
 		}
 
 		private void execute(string gitCommand, string path)
@@ -60,7 +63,7 @@ namespace SpiderRT
 				RedirectStandardError = true,
 				RedirectStandardOutput = true,
 				UseShellExecute = false,
-				FileName = Path.Combine(_settings.GitPath, "git.exe"),
+				FileName = Path.Combine(_gitPath, "git.exe"),
 				Arguments = gitCommand,
 				WorkingDirectory = path
 			};
